@@ -1,4 +1,4 @@
-module Buff1(R1,B1,G1,RE1,WE1,Addr1,WData, clk, reset);
+module Buf1(R1,B1,G1,RE1,WE1,Addr1,WData, clk, reset);
   input RE1,WE1, clk, reset;
   input [19:0]Addr1;
   input [31:0] WData;

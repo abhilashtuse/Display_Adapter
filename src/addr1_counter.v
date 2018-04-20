@@ -1,7 +1,7 @@
 module Addr1_counter(Addr1, clk, ResetAddr1, IncAddr1,);
   input clk, ResetAddr1, IncAddr1 ;
-  output [9:0] Addr1;
-  reg [9:0] Addr1 = 0;
+  output [19:0] Addr1;
+  reg [19:0] Addr1 = 0;
 
   initial
   begin
