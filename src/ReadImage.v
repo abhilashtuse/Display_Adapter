@@ -1,9 +1,8 @@
-module File_read(clk,fout,imageNumber, signal);
-
-  input clk;
+module ReadImage(clk,fout,imageNumber, signal);
+  input clk,signal;
   input [2:0] imageNumber;
-  output [23:0]fout;
-  reg [23:0]fout;
+  output [31:0]fout;
+  reg [31:0]fout;
   integer count1;
   integer rfileId, wfileId, i, ret_val;
   reg [23:0] image1[9999:0];
@@ -14,7 +13,7 @@ module File_read(clk,fout,imageNumber, signal);
   initial
   begin
     // Read image1
-    rfileId = $fopen("headless_sample.bmp", "rb");
+    rfileId = $fopen("../bin/headless_sample.bmp", "rb");
     if (!rfileId) begin
         $display("Cannot open file to read");
         $finish;
@@ -40,13 +39,14 @@ module File_read(clk,fout,imageNumber, signal);
     rfileId = $fopen("headless_sample.bmp", "rb");
     ret_val = $fread(image4, rfileId);
     $fclose(rfileId);
-    counter = 0;
+    count1 = 0;
+    fout = 0;
   end
 
   always@ (posedge clk)
   begin
     if(imageNumber == 1 && signal == 1) begin
-      fout = image1[count];
+      fout[23:0] = image1[count1];
       count1 = count1+1;
     end
   end

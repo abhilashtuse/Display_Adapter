@@ -41,13 +41,15 @@ begin
 
     //0
     IDLE: begin
-      if(CSDisplay == 1)
+      if(CSDisplay == 1) begin
         nextState = START0;
         WE0 = 0;
-      else
+      end
+      else begin
         nextState = IDLE;
         WE0 = 1;
         WE1 = 0;
+      end
     end
 
     //1

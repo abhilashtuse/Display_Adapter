@@ -1,9 +1,9 @@
 module DataPath(WData, HBOut_PD, VBOut_PD, AIPOut_PD, AILOut_PD, CSDisplay,clk, reset);
 input [31:0]WData;
-input [9:0]VBOut;
-input [9:0]HBOut;
-input [9:0]AIPOut;
-input [9:0]AILOut;
+input [9:0]VBOut_PD;
+input [9:0]HBOut_PD;
+input [9:0]AIPOut_PD;
+input [9:0]AILOut_PD;
 input clk, reset, CSDisplay;
 
 reg [9:0]VBOut;

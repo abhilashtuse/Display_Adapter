@@ -11,15 +11,15 @@ reg count = 0;
 always@ (posedge clk && FrameIn)
 begin
   if(count == 0) begin
-  temp = FrameIn;
+  temp[0:7] = FrameIn;
   count = count + 1;
   end
   if(count == 1) begin
-  temp[15:8] = FrameIn;
+  temp[8:15] = FrameIn;
   count = count + 1;
   end
   if(count == 2) begin
-  temp[23:16] = FrameIn;
+  temp[16:23] = FrameIn;
   frame[LineOut] = frame[LineOut] | (temp >> (24 * PxOut));
   count = 0;
   end
