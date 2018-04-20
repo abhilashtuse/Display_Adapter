@@ -25,9 +25,9 @@ module Buf1(R1,B1,G1,RE1,WE1,Addr1,WData, clk, reset);
         end
         if(WE1 == 0 && RE1 == 1) begin
         result = buff1[Addr1];
-          B1 = result[7:0];
+          R1 = result[7:0];
           G1 = result[15:8];
-          R1 = result[23:16];
+          B1 = result[23:16];
         end
       end
 

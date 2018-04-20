@@ -43,8 +43,11 @@ begin
     IDLE: begin
       if(CSDisplay == 1)
         nextState = START0;
+        WE0 = 0;
       else
         nextState = IDLE;
+        WE0 = 1;
+        WE1 = 0;
     end
 
     //1
@@ -52,18 +55,22 @@ begin
       SelBlank = 1;
       Buf1Empty = 1;
       SyncVB = 1;
+      WE0 = 0;
+      WE1 = 1;
       nextState = VB0G;
     end
 
     //2
     VB0R: begin
       SelBlank = 1;
+      WE1 = 1;
       nextState = VB0G;
     end
 
     //3
     VB0G: begin
       SelBlank = 1;
+      WE1 = 1;
       nextState = VB0B;
     end
 
@@ -71,7 +78,7 @@ begin
     VB0B: begin
       IncPx = 1;
       SelBlank = 1;
-
+      WE1 = 1;
       //check else condition if code does not run properly
       if(PxOut < (HBOut + AIPOut -2))
         nextState = VB0R;
@@ -82,12 +89,14 @@ begin
     //5
     ResetVB0R: begin
       SelBlank = 1;
+      WE1 = 1;
       nextState = ResetVB0G;
     end
 
     //6
     ResetVB0G: begin
       SelBlank = 1;
+      WE1 = 1;
       if(LineOut < (VBOut - 1))
         nextState = ResetVB0B;
       else if(LineOut == (VBOut - 1))
@@ -100,6 +109,7 @@ begin
       IncLine = 1;
       SelBlank = 1;
       nextState = VB0R;
+      WE1 = 1;
     end
 
     //8
@@ -107,6 +117,7 @@ begin
       ResetPx = 1;
       ResetLine = 1;
       SelBlank = 1;
+      WE1 = 1;
       nextState = SyncHB0A;
     end
 
@@ -114,18 +125,21 @@ begin
     SyncHB0A: begin
       SyncHB = 1;
       SelBlank = 1;
+      WE1 = 1;
       nextState = HB0G;
     end
 
     //10
     HB0R: begin
       SelBlank = 1;
+      WE1 = 1;
       nextState = HB0G;
     end
 
     //11
     HB0R: begin
       SelBlank = 1;
+      WE1 = 1;
       nextState = HB0B;
     end
 
@@ -133,6 +147,7 @@ begin
     HB0B: begin
       IncPx = 1;
       SelBlank = 1;
+      WE1 = 1;
       if(PxOut < (HBOut - 2))
       nextState = HB0R;
       else if(PxOut == (HBOut - 2))
@@ -142,12 +157,14 @@ begin
     //13
     ResetHB0R: begin
       SelBlank = 1;
+      WE1 = 1;
       nextState = ResetHB0G;
     end
 
     //14
     ResetHB0G: begin
       SelBlank = 1;
+      WE1 = 1;
       nextState = ResetHB0B;
     end
 
@@ -156,6 +173,7 @@ begin
       ResetPx = 1;
       SelBlank = 1;
       RE0 = 1;
+      WE1 = 1;
       nextState = R0;
     end
 
@@ -164,6 +182,7 @@ begin
       SelR0 = 1;
       SelBuf0 = 1;
       RE0 = 1;
+      WE1 = 1;
       nextState = G0;
     end
 
@@ -173,6 +192,7 @@ begin
       SelBuf0 = 1;
       RE0 = 1;
       IncAddr0 = 1;
+      WE1 = 1;
       nextState = B0;
     end
 
@@ -182,6 +202,7 @@ begin
       SelB0 = 1;
       SelBuf0 = 1;
       RE0 = 1;
+      WE1 = 1;
       if(PxOut < (HBOut - 2))
       nextState = R0;
       else if(PxOut == (HBOut - 2))
@@ -193,6 +214,7 @@ begin
       SelR0 = 1;
       SelBuf0 = 1;
       RE0 = 1;
+      WE1 = 1;
       nextState = ResetG0;
     end
 
@@ -201,6 +223,7 @@ begin
       SelG0 = 1;
       SelBuf0 = 1;
       RE0 = 1;
+      WE1 = 1;
       nextState = ResetB0;
     end
 
@@ -210,6 +233,7 @@ begin
       IncLine = 1;
       SelB0 = 1;
       SelBuf0 = 1;
+      WE1 = 1;
       if(LineOut < (AILOut - 2))
         nextState = SyncHB0;
       else if(LineOut == (AILOut - 2))
@@ -220,6 +244,7 @@ begin
     SyncHB0: begin
       SyncHB = 1;
       SelBlank = 1;
+      WE1 = 1;
       nextState = HB0G;
     end
 
@@ -227,18 +252,21 @@ begin
     SyncHB0B: begin
       SyncHB = 1;
       SelBlank = 1;
+      WE1 = 1;
       nextState = LastHB0G;
     end
 
     //24
     LastHB0R: begin
       SelBlank = 1;
+      WE1 = 1;
       nextState = LastHB0G;
     end
 
     //25
     LastHB0R: begin
       SelBlank = 1;
+      WE1 = 1;
       nextState = LastHB0B;
     end
 
@@ -246,6 +274,7 @@ begin
     LastHB0B: begin
       IncPx = 1;
       SelBlank = 1;
+      WE1 = 1;
       if(PxOut < (HBOut - 2))
       nextState = LastHB0R;
       else if(PxOut == (HBOut - 2))
@@ -256,11 +285,13 @@ begin
     ResetLastHB0R: begin
       SelBlank = 1;
       nextState = ResetLastHB0G;
+      WE1 = 1;
     end
 
     //28
     ResetLastHB0G: begin
       SelBlank = 1;
+      WE1 = 1;
       nextState = ResetLastHB0B;
     end
 
@@ -269,6 +300,7 @@ begin
       ResetPx = 1;
       SelBlank = 1;
       RE0 = 1;
+      WE1 = 1;
       nextState = LastR0;
     end
 
@@ -277,6 +309,7 @@ begin
       SelR0 = 1;
       SelBuf0 = 1;
       RE0 = 1;
+      WE1 = 1;
       nextState = LastG0;
     end
 
@@ -287,6 +320,7 @@ begin
       RE0 = 1;
       IncAddr0 = 1;
       nextState = LastB0;
+      WE1 = 1;
     end
 
     //32
@@ -295,6 +329,7 @@ begin
       SelB0 = 1;
       SelBuf0 = 1;
       RE0 = 1;
+      WE1 = 1;
       if(PxOut < (AIPOut - 2))
       nextState = LastR0;
       else if(PxOut == (AIPOut - 2))
@@ -306,6 +341,7 @@ begin
       SelR0 = 1;
       SelBuf0 = 1;
       RE0 = 1;
+      WE1 = 1;
       nextState = ResetLastG0;
     end
 
@@ -315,6 +351,7 @@ begin
       SelBuf0 = 1;
       RE0 = 1;
       ResetAddr0 = 1;
+      WE1 = 1;
       nextState = ResetLastB0;
     end
 
@@ -324,6 +361,7 @@ begin
       ResetPx = 1;
       SelB0 = 1;
       SelBuf0 = 1;
+      WE1 = 1;
       nextState = START1;
     end
 
@@ -333,17 +371,21 @@ begin
       Buf1Empty = 1;
       SyncVB = 1;
       nextState = VB1G;
+      WE0 = 1;
+      WE1 = 0;
     end
 
     //37
     VB1R: begin
       SelBlank = 1;
+      WE0 = 1;
       nextState = VB1G;
     end
 
     //38
     VB1G: begin
       SelBlank = 1;
+      WE0 = 1;
       nextState = VB1B;
     end
 
@@ -351,7 +393,7 @@ begin
     VB1B: begin
       IncPx = 1;
       SelBlank = 1;
-
+      WE0 = 1;
       //check else condition if code does not run properly
       if(PxOut < (HBOut + AIPOut -2))
         nextState = VB1R;
@@ -362,12 +404,14 @@ begin
     //40
     ResetVB1R: begin
       SelBlank = 1;
+      WE0 = 1;
       nextState = ResetVB1G;
     end
 
     //41
     ResetVB1G: begin
       SelBlank = 1;
+      WE0 = 1;
       if(LineOut < (VBOut - 1))
         nextState = ResetVB1B;
       else if(LineOut == (VBOut - 1))
@@ -379,6 +423,7 @@ begin
       ResetPx = 1;
       IncLine = 1;
       SelBlank = 1;
+      WE0 = 1;
       nextState = VB1R;
     end
 
@@ -387,6 +432,7 @@ begin
       ResetPx = 1;
       ResetLine = 1;
       SelBlank = 1;
+      WE0 = 1;
       nextState = SyncHB1A;
     end
 
@@ -394,18 +440,21 @@ begin
     SyncHB1A: begin
       SyncHB = 1;
       SelBlank = 1;
+      WE0 = 1;
       nextState = HB1G;
     end
 
     //45
     HB1R: begin
       SelBlank = 1;
+      WE0 = 1;
       nextState = HB1G;
     end
 
     //46
     HB1R: begin
       SelBlank = 1;
+      WE0 = 1;
       nextState = HB1B;
     end
 
@@ -413,6 +462,7 @@ begin
     HB1B: begin
       IncPx = 1;
       SelBlank = 1;
+      WE0 = 1;
       if(PxOut < (HBOut - 2))
       nextState = HB1R;
       else if(PxOut == (HBOut - 2))
@@ -422,12 +472,14 @@ begin
     //48
     ResetHB1R: begin
       SelBlank = 1;
+      WE0 = 1;
       nextState = ResetHB1G;
     end
 
     //49
     ResetHB1G: begin
       SelBlank = 1;
+      WE0 = 1;
       nextState = ResetHB1B;
     end
 
@@ -436,6 +488,7 @@ begin
       ResetPx = 1;
       SelBlank = 1;
       RE1 = 1;
+      WE0 = 1;
       nextState = R1;
     end
 
@@ -444,6 +497,7 @@ begin
       SelR1 = 1;
       SelBuf1 = 1;
       RE1 = 1;
+      WE0 = 1;
       nextState = G1;
     end
 
@@ -453,6 +507,7 @@ begin
       SelBuf1 = 1;
       RE1 = 1;
       IncAddr1 = 1;
+      WE0 = 1;
       nextState = B1;
     end
 
@@ -462,6 +517,7 @@ begin
       SelB1 = 1;
       SelBuf1 = 1;
       RE1 = 1;
+      WE0 = 1;
       if(PxOut < (HBOut - 2))
       nextState = R1;
       else if(PxOut == (HBOut - 2))
@@ -473,6 +529,7 @@ begin
       SelR1 = 1;
       SelBuf1 = 1;
       RE1 = 1;
+      WE0 = 1;
       nextState = ResetG1;
     end
 
@@ -481,6 +538,7 @@ begin
       SelG1 = 1;
       SelBuf1 = 1;
       RE1 = 1;
+      WE0 = 1;
       nextState = ResetB1;
     end
 
@@ -490,6 +548,7 @@ begin
       IncLine = 1;
       SelB1 = 1;
       SelBuf1 = 1;
+      WE0 = 1;
       if(LineOut < (AILOut - 2))
         nextState = SyncHB1;
       else if(LineOut == (AILOut - 2))
@@ -500,6 +559,7 @@ begin
     SyncHB1: begin
       SyncHB = 1;
       SelBlank = 1;
+      WE0 = 1;
       nextState = HB1G;
     end
 
@@ -507,18 +567,21 @@ begin
     SyncHB1B: begin
       SyncHB = 1;
       SelBlank = 1;
+      WE0 = 1;
       nextState = LastHB1G;
     end
 
     //59
     LastHB1R: begin
       SelBlank = 1;
+      WE0 = 1;
       nextState = LastHB1G;
     end
 
     //60
     LastHB1R: begin
       SelBlank = 1;
+      WE0 = 1;
       nextState = LastHB1B;
     end
 
@@ -526,6 +589,7 @@ begin
     LastHB1B: begin
       IncPx = 1;
       SelBlank = 1;
+      WE0 = 1;
       if(PxOut < (HBOut - 2))
       nextState = LastHB1R;
       else if(PxOut == (HBOut - 2))
@@ -535,12 +599,14 @@ begin
     //62
     ResetLastHB1R: begin
       SelBlank = 1;
+      WE0 = 1;
       nextState = ResetLastHB1G;
     end
 
     //63
     ResetLastHB1G: begin
       SelBlank = 1;
+      WE0 = 1;
       nextState = ResetLastHB1B;
     end
 
@@ -549,6 +615,7 @@ begin
       ResetPx = 1;
       SelBlank = 1;
       RE1 = 1;
+      WE0 = 1;
       nextState = LastR1;
     end
 
@@ -557,6 +624,7 @@ begin
       SelR1 = 1;
       SelBuf1 = 1;
       RE1 = 1;
+      WE0 = 1;
       nextState = LastG1;
     end
 
@@ -566,6 +634,7 @@ begin
       SelBuf1 = 1;
       RE1 = 1;
       IncAddr1 = 1;
+      WE0 = 1;
       nextState = LastB1;
     end
 
@@ -575,6 +644,7 @@ begin
       SelB1 = 1;
       SelBuf1 = 1;
       RE1 = 1;
+      WE0 = 1;
       if(PxOut < (AIPOut - 2))
       nextState = LastR1;
       else if(PxOut == (AIPOut - 2))
@@ -586,6 +656,7 @@ begin
       SelR1 = 1;
       SelBuf1 = 1;
       RE1 = 1;
+      WE0 = 1;
       nextState = ResetLastG1;
     end
 
@@ -595,6 +666,7 @@ begin
       SelBuf1 = 1;
       RE1 = 1;
       ResetAddr1 = 1;
+      WE0 = 1;
       nextState = ResetLastB1;
     end
 
@@ -604,6 +676,7 @@ begin
       ResetPx = 1;
       SelB1 = 1;
       SelBuf1 = 1;
+      WE0 = 1;
       nextState = START0;
     end
  endcase

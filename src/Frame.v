@@ -4,8 +4,8 @@ input [9:0]PxOut;
 input [9:0]LineOut;
 input clk, reset;
 
-reg [2399:0]frame[99:0];
-reg [2399:0]temp;
+reg [0:2640]frame[0:109];
+reg [0:2640]temp;
 reg count = 0;
 
 always@ (posedge clk && FrameIn)
@@ -20,7 +20,7 @@ begin
   end
   if(count == 2) begin
   temp[23:16] = FrameIn;
-  frame[LineOut] = frame[LineOut] | (temp >> (24 * PxOut)); 
+  frame[LineOut] = frame[LineOut] | (temp >> (24 * PxOut));
   count = 0;
   end
 end

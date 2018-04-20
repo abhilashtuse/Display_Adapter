@@ -26,8 +26,8 @@ module Buf0(R0,B0,G0,RE0,WE0,Addr0,WData, clk, reset);
         if(WE0 == 0 && RE0 == 1) begin
         result = buff0[Addr0];
           R0 = result[7:0];
-          B0 = result[15:8];
-          G0 = result[23:16];
+          G0 = result[15:8];
+          B0 = result[23:16];
         end
       end
 
