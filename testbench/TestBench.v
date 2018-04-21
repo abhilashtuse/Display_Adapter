@@ -14,23 +14,24 @@ module test_DataPath;
     initial
         begin
             imageNumber = 0;
+            CSDisplay = 0;
+            VBOut_PD = 10;
+            HBOut_PD = 10;
+            AIPOut_PD = 100;
+            AILOut_PD = 100;
+            $display("In TestBench HBOut:%d",HBOut_PD);
             clk = 1;
             forever #1 clk= !clk;
         end
 
     initial
         begin
-            /*  reset = 1;
-            #2 reset = 0;
-            #2;
-            #2 reset = 1;
-            #2; reset = 0;*/
-
-            reset = 1;
-            #2 reset = 0; signal = 1; imageNumber = 1;
-            repeat(20)
-              #2;
-            $finish;
+          reset = 1;
+          #2 reset = 0; CSDisplay= 0; signal = 1; imageNumber = 1;
+          repeat(10000)#2;
+          #2  CSDisplay= 1;
+          repeat(50000)#2;
+          $finish;
         end
 
     initial

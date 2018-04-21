@@ -1,5 +1,7 @@
 module pixel_counter(PxOut, clk, ResetPx, IncPx,);
   input clk, ResetPx, IncPx ;
+  wire clk, ResetPx, IncPx ;
+  
   output [9:0] PxOut;
   reg [9:0] PxOut = 0;
 

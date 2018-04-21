@@ -3,6 +3,10 @@ input SelBuf0, SelBlank, SelBuf1;
 input [7:0]Buf0;
 input [7:0]Buf1;
 
+wire SelBuf0, SelBlank, SelBuf1;
+wire [7:0]Buf0;
+wire [7:0]Buf1;
+
 output [7:0]FrameIn;
 reg [7:0]FrameIn;
 

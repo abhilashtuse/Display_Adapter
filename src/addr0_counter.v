@@ -1,5 +1,7 @@
 module Addr0_counter(Addr0, clk, ResetAddr0, IncAddr0,);
-  input clk, ResetAddr0, IncAddr0 ;
+  input clk, ResetAddr0, IncAddr0;
+  wire clk, ResetAddr0, IncAddr0;
+
   output [19:0] Addr0;
   reg [19:0] Addr0 = 0;
 

@@ -1,6 +1,10 @@
 module ReadImage(clk,fout,imageNumber, signal);
   input clk,signal;
   input [2:0] imageNumber;
+
+  wire clk,signal;
+  wire [2:0] imageNumber;
+
   output [31:0]fout;
   reg [31:0]fout;
   integer count1;

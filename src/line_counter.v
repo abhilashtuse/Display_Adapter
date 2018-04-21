@@ -1,5 +1,7 @@
 module line_counter(LineOut, clk, ResetLine, IncLine,);
   input clk, ResetLine, IncLine ;
+
+  wire clk, ResetLine, IncLine ;
   output [9:0] LineOut;
   reg [9:0] LineOut = 0;
 
@@ -10,7 +12,7 @@ module line_counter(LineOut, clk, ResetLine, IncLine,);
 
   always @(posedge clk or ResetLine)
   begin
-    if(ResetLine==1) begin
+    if(ResetLine == 1) begin
       LineOut <= 0;
     end
     else begin

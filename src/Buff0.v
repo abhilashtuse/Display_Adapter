@@ -3,6 +3,10 @@ module Buf0(R0,B0,G0,RE0,WE0,Addr0,WData, clk, reset);
   input [19:0]Addr0;
   input [31:0] WData;
 
+  wire RE0,WE0, clk, reset;
+  wire [19:0]Addr0;
+  wire [31:0] WData;
+
   output [7:0]R0;
   output [7:0]B0;
   output [7:0]G0;
@@ -14,7 +18,7 @@ module Buf0(R0,B0,G0,RE0,WE0,Addr0,WData, clk, reset);
   reg [23:0]result;
   always @ (posedge clk)
     begin
-      if(reset==1) begin
+      if(reset == 1) begin
         G0 = 0;
         B0 = 0;
         R0 = 0;
@@ -30,7 +34,6 @@ module Buf0(R0,B0,G0,RE0,WE0,Addr0,WData, clk, reset);
           B0 = result[23:16];
         end
       end
-
     end
 
 endmodule

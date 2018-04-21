@@ -4,8 +4,13 @@ input [9:0]PxOut;
 input [9:0]LineOut;
 input clk, reset;
 
-reg [0:2640]frame[0:109];
-reg [0:2640]temp;
+wire [7:0]FrameIn;
+wire [9:0]PxOut;
+wire [9:0]LineOut;
+wire clk, reset;
+
+reg [0:2639]frame[0:109];
+reg [0:2639]temp;
 reg count = 0;
 
 always@ (posedge clk && FrameIn)

@@ -2,6 +2,9 @@ module BufMUX(Buf, R, G, B, SelR, SelG, SelB);
 input  SelR, SelG, SelB;
 input [7:0]R, G, B;
 
+wire  SelR, SelG, SelB;
+wire [7:0]R, G, B;
+
 output [7:0]Buf;
 reg [7:0]Buf;
 

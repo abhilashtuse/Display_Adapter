@@ -10,6 +10,13 @@ SyncHB, SyncVB, Buf0Empty,Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1,
   input [9:0]AILOut;
   input CSDisplay, reset, clk;
 
+  wire [9:0]PxOut;
+  wire [9:0]LineOut;
+  wire [9:0]VBOut;
+  wire [9:0]HBOut;
+  wire [9:0]AIPOut;
+  wire [9:0]AILOut;
+wire CSDisplay, reset, clk;
   output RE0,WE0,RE1,WE1,SelR0,SelG0,SelB0,SelR1,SelG1,SelB1,SelBuf0, SelBlank,
          SelBuf1, IncPx, ResetPx, IncLine, ResetLine,SyncHB, SyncVB, Buf0Empty,
          Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1;
@@ -17,7 +24,8 @@ SyncHB, SyncVB, Buf0Empty,Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1,
          SelBuf1, IncPx, ResetPx, IncLine, ResetLine,SyncHB, SyncVB, Buf0Empty,
          Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1;
 
-  reg state, nextState;
+  reg Inc0Flag;
+  reg [6:0] state, nextState;
 
   //Parameters for Buffer 0
   parameter IDLE = 0, START0 = 1, VB0R = 2, VB0G = 3, VB0B = 4, ResetVB0R = 5, ResetVB0G = 6, ResetVB0B = 7,
@@ -35,651 +43,675 @@ SyncHB, SyncVB, Buf0Empty,Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1,
             ResetLastHB1B = 64, LastR1 = 65, LastG1 = 66, LastB1 = 67, ResetLastR1 = 68, ResetLastG1 = 69,
             ResetLastB1 = 70;
 
-always @(state) // always block to compute output
+initial
+begin
+  Inc0Flag = 0;
+
+  RE0 = 0;WE0 = 0;RE1 = 0;WE1 = 0;SelR0 = 0;SelG0 = 0;SelB0 = 0;SelR1 = 0;SelG1 = 0;SelB1 = 0;SelBuf0 = 0; SelBlank = 0;
+  SelBuf1 = 0; IncPx = 0; ResetPx = 0; IncLine = 0; ResetLine = 0;SyncHB = 0; SyncVB = 0; IncAddr0 = 0;
+  ResetAddr0 = 0; IncAddr1 = 0; ResetAddr1 = 0;
+end
+
+always @(*) // always block to compute output
 begin
  case(state)
-
     //0
     IDLE: begin
       if(CSDisplay == 1) begin
-        nextState = START0;
-        WE0 = 0;
+        nextState <= START0;
+        WE0 <= 0;
       end
       else begin
-        nextState = IDLE;
-        WE0 = 1;
-        WE1 = 0;
+        nextState <= IDLE;
+        WE0 <= 1;
+        WE1 <= 0;
+        if(Inc0Flag == 0) begin
+          IncAddr0 <= 0;
+          Inc0Flag <= 1;
+        end
+        else begin
+          IncAddr0 <= 0;
+        end
       end
     end
 
     //1
-    START0: begin
-      SelBlank = 1;
-      Buf1Empty = 1;
-      SyncVB = 1;
-      WE0 = 0;
-      WE1 = 1;
-      nextState = VB0G;
+     START0: begin
+      SelBlank <= 1;
+      Buf1Empty <= 1;
+      SyncVB <= 1;
+      WE0 <= 0;
+      WE1 <= 1;
+      nextState <= VB0G;
     end
 
     //2
     VB0R: begin
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = VB0G;
+      SelBlank <= 1;
+      WE1 <= 1;
+
+      //complementary cases
+      IncPx <= 0;
+      IncLine <= 0;
+      ResetPx <= 0;
+      nextState <= VB0G;
     end
 
     //3
     VB0G: begin
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = VB0B;
+      SelBlank <= 1;
+      WE1 <= 1;
+      nextState <= VB0B;
     end
 
     //4
     VB0B: begin
-      IncPx = 1;
-      SelBlank = 1;
-      WE1 = 1;
+      IncPx <= 1;
+      SelBlank <= 1;
+      WE1 <= 1;
       //check else condition if code does not run properly
-      if(PxOut < (HBOut + AIPOut -2))
-        nextState = VB0R;
-      else if(PxOut < (HBOut + AIPOut -2))
-        nextState = ResetVB0R;
+      if(PxOut < (HBOut + AIPOut -10))
+        nextState <= VB0R;
+      else if(PxOut == (HBOut + AIPOut -10))
+        nextState <= ResetVB0R;
     end
 
     //5
     ResetVB0R: begin
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = ResetVB0G;
+      SelBlank <= 1;
+      WE1 <= 1;
+
+      //complementary cases
+      IncPx <= 0;
+
+      nextState <= ResetVB0G;
     end
 
     //6
     ResetVB0G: begin
-      SelBlank = 1;
-      WE1 = 1;
+      SelBlank <= 1;
+      WE1 <= 1;
       if(LineOut < (VBOut - 1))
-        nextState = ResetVB0B;
+        nextState <= ResetVB0B;
       else if(LineOut == (VBOut - 1))
-        nextState = Switch0VBtoHB;
+        nextState <= Switch0VBtoHB;
     end
 
     //7
-    ResetVB0R: begin
-      ResetPx = 1;
-      IncLine = 1;
-      SelBlank = 1;
-      nextState = VB0R;
-      WE1 = 1;
+    ResetVB0B: begin
+      ResetPx <= 1;
+      IncLine <= 1;
+      SelBlank <= 1;
+      nextState <= VB0R;
+      WE1 <= 1;
     end
 
     //8
     Switch0VBtoHB: begin
-      ResetPx = 1;
-      ResetLine = 1;
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = SyncHB0A;
+      ResetPx <= 1;
+      ResetLine <= 1;
+      SelBlank <= 1;
+      WE1 <= 1;
+      nextState <= SyncHB0A;
     end
 
     //9
     SyncHB0A: begin
-      SyncHB = 1;
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = HB0G;
+      SyncHB <= 1;
+      SelBlank <= 1;
+      WE1 <= 1;
+      nextState <= HB0G;
     end
 
     //10
     HB0R: begin
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = HB0G;
+      SelBlank <= 1;
+      WE1 <= 1;
+      nextState <= HB0G;
     end
 
     //11
     HB0R: begin
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = HB0B;
+      SelBlank <= 1;
+      WE1 <= 1;
+      nextState <= HB0B;
     end
 
     //12
     HB0B: begin
-      IncPx = 1;
-      SelBlank = 1;
-      WE1 = 1;
+      IncPx <= 1;
+      SelBlank <= 1;
+      WE1 <= 1;
       if(PxOut < (HBOut - 2))
-      nextState = HB0R;
+      nextState <= HB0R;
       else if(PxOut == (HBOut - 2))
-      nextState = ResetHB0R;
+      nextState <= ResetHB0R;
     end
 
     //13
     ResetHB0R: begin
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = ResetHB0G;
+      SelBlank <= 1;
+      WE1 <= 1;
+      nextState <= ResetHB0G;
     end
 
     //14
     ResetHB0G: begin
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = ResetHB0B;
+      SelBlank <= 1;
+      WE1 <= 1;
+      nextState <= ResetHB0B;
     end
 
     //15
     ResetHB0B: begin
-      ResetPx = 1;
-      SelBlank = 1;
-      RE0 = 1;
-      WE1 = 1;
-      nextState = R0;
+      ResetPx <= 1;
+      SelBlank <= 1;
+      RE0 <= 1;
+      WE1 <= 1;
+      nextState <= R0;
     end
 
     //16
     R0: begin
-      SelR0 = 1;
-      SelBuf0 = 1;
-      RE0 = 1;
-      WE1 = 1;
-      nextState = G0;
+      SelR0 <= 1;
+      SelBuf0 <= 1;
+      RE0 <= 1;
+      WE1 <= 1;
+      nextState <= G0;
     end
 
     //17
     G0: begin
-      SelG0 = 1;
-      SelBuf0 = 1;
-      RE0 = 1;
-      IncAddr0 = 1;
-      WE1 = 1;
-      nextState = B0;
+      SelG0 <= 1;
+      SelBuf0 <= 1;
+      RE0 <= 1;
+      IncAddr0 <= 1;
+      WE1 <= 1;
+      nextState <= B0;
     end
 
     //18
     G0: begin
-      IncPx = 1;
-      SelB0 = 1;
-      SelBuf0 = 1;
-      RE0 = 1;
-      WE1 = 1;
+      IncPx <= 1;
+      SelB0 <= 1;
+      SelBuf0 <= 1;
+      RE0 <= 1;
+      WE1 <= 1;
       if(PxOut < (HBOut - 2))
-      nextState = R0;
+      nextState <= R0;
       else if(PxOut == (HBOut - 2))
-      nextState = ResetR0;
+      nextState <= ResetR0;
     end
 
     //19
     ResetR0: begin
-      SelR0 = 1;
-      SelBuf0 = 1;
-      RE0 = 1;
-      WE1 = 1;
-      nextState = ResetG0;
+      SelR0 <= 1;
+      SelBuf0 <= 1;
+      RE0 <= 1;
+      WE1 <= 1;
+      nextState <= ResetG0;
     end
 
     //20
     ResetG0: begin
-      SelG0 = 1;
-      SelBuf0 = 1;
-      RE0 = 1;
-      WE1 = 1;
-      nextState = ResetB0;
+      SelG0 <= 1;
+      SelBuf0 <= 1;
+      RE0 <= 1;
+      WE1 <= 1;
+      nextState <= ResetB0;
     end
 
     //21
     ResetB0: begin
-      ResetPx = 1;
-      IncLine = 1;
-      SelB0 = 1;
-      SelBuf0 = 1;
-      WE1 = 1;
+      ResetPx <= 1;
+      IncLine <= 1;
+      SelB0 <= 1;
+      SelBuf0 <= 1;
+      WE1 <= 1;
       if(LineOut < (AILOut - 2))
-        nextState = SyncHB0;
+        nextState <= SyncHB0;
       else if(LineOut == (AILOut - 2))
-        nextState = SyncHB0B;
+        nextState <= SyncHB0B;
     end
 
     //22
     SyncHB0: begin
-      SyncHB = 1;
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = HB0G;
+      SyncHB <= 1;
+      SelBlank <= 1;
+      WE1 <= 1;
+      nextState <= HB0G;
     end
 
     //23
     SyncHB0B: begin
-      SyncHB = 1;
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = LastHB0G;
+      SyncHB <= 1;
+      SelBlank <= 1;
+      WE1 <= 1;
+      nextState <= LastHB0G;
     end
 
     //24
     LastHB0R: begin
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = LastHB0G;
+      SelBlank <= 1;
+      WE1 <= 1;
+      nextState <= LastHB0G;
     end
 
     //25
     LastHB0R: begin
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = LastHB0B;
+      SelBlank <= 1;
+      WE1 <= 1;
+      nextState <= LastHB0B;
     end
 
     //26
     LastHB0B: begin
-      IncPx = 1;
-      SelBlank = 1;
-      WE1 = 1;
+      IncPx <= 1;
+      SelBlank <= 1;
+      WE1 <= 1;
       if(PxOut < (HBOut - 2))
-      nextState = LastHB0R;
+      nextState <= LastHB0R;
       else if(PxOut == (HBOut - 2))
-      nextState = ResetLastHB0R;
+      nextState <= ResetLastHB0R;
     end
 
     //27
     ResetLastHB0R: begin
-      SelBlank = 1;
-      nextState = ResetLastHB0G;
-      WE1 = 1;
+      SelBlank <= 1;
+      nextState <= ResetLastHB0G;
+      WE1 <= 1;
     end
 
     //28
     ResetLastHB0G: begin
-      SelBlank = 1;
-      WE1 = 1;
-      nextState = ResetLastHB0B;
+      SelBlank <= 1;
+      WE1 <= 1;
+      nextState <= ResetLastHB0B;
     end
 
     //29
     ResetLastHB0B: begin
-      ResetPx = 1;
-      SelBlank = 1;
-      RE0 = 1;
-      WE1 = 1;
-      nextState = LastR0;
+      ResetPx <= 1;
+      SelBlank <= 1;
+      RE0 <= 1;
+      WE1 <= 1;
+      nextState <= LastR0;
     end
 
     //30
     LastR0: begin
-      SelR0 = 1;
-      SelBuf0 = 1;
-      RE0 = 1;
-      WE1 = 1;
-      nextState = LastG0;
+      SelR0 <= 1;
+      SelBuf0 <= 1;
+      RE0 <= 1;
+      WE1 <= 1;
+      nextState <= LastG0;
     end
 
     //31
     LastG0: begin
-      SelG0 = 1;
-      SelBuf0 = 1;
-      RE0 = 1;
-      IncAddr0 = 1;
-      nextState = LastB0;
-      WE1 = 1;
+      SelG0 <= 1;
+      SelBuf0 <= 1;
+      RE0 <= 1;
+      IncAddr0 <= 1;
+      nextState <= LastB0;
+      WE1 <= 1;
     end
 
     //32
     LastG0: begin
-      IncPx = 1;
-      SelB0 = 1;
-      SelBuf0 = 1;
-      RE0 = 1;
-      WE1 = 1;
+      IncPx <= 1;
+      SelB0 <= 1;
+      SelBuf0 <= 1;
+      RE0 <= 1;
+      WE1 <= 1;
       if(PxOut < (AIPOut - 2))
-      nextState = LastR0;
+      nextState <= LastR0;
       else if(PxOut == (AIPOut - 2))
-      nextState = ResetLastR0;
+      nextState <= ResetLastR0;
     end
 
     //33
     ResetLastR0: begin
-      SelR0 = 1;
-      SelBuf0 = 1;
-      RE0 = 1;
-      WE1 = 1;
-      nextState = ResetLastG0;
+      SelR0 <= 1;
+      SelBuf0 <= 1;
+      RE0 <= 1;
+      WE1 <= 1;
+      nextState <= ResetLastG0;
     end
 
     //34
     ResetLastG0: begin
-      SelG0 = 1;
-      SelBuf0 = 1;
-      RE0 = 1;
-      ResetAddr0 = 1;
-      WE1 = 1;
-      nextState = ResetLastB0;
+      SelG0 <= 1;
+      SelBuf0 <= 1;
+      RE0 <= 1;
+      ResetAddr0 <= 1;
+      WE1 <= 1;
+      nextState <= ResetLastB0;
     end
 
     //35
     ResetLastB0: begin
-      ResetLine = 1;
-      ResetPx = 1;
-      SelB0 = 1;
-      SelBuf0 = 1;
-      WE1 = 1;
-      nextState = START1;
+      ResetLine <= 1;
+      ResetPx <= 1;
+      SelB0 <= 1;
+      SelBuf0 <= 1;
+      WE1 <= 1;
+      nextState <= START1;
     end
 
     //36
     START1: begin
-      SelBlank = 1;
-      Buf1Empty = 1;
-      SyncVB = 1;
-      nextState = VB1G;
-      WE0 = 1;
-      WE1 = 0;
+      SelBlank <= 1;
+      Buf1Empty <= 1;
+      SyncVB <= 1;
+      nextState <= VB1G;
+      WE0 <= 1;
+      WE1 <= 0;
     end
 
     //37
     VB1R: begin
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = VB1G;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= VB1G;
     end
 
     //38
     VB1G: begin
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = VB1B;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= VB1B;
     end
 
     //39
     VB1B: begin
-      IncPx = 1;
-      SelBlank = 1;
-      WE0 = 1;
+      IncPx <= 1;
+      SelBlank <= 1;
+      WE0 <= 1;
       //check else condition if code does not run properly
       if(PxOut < (HBOut + AIPOut -2))
-        nextState = VB1R;
+        nextState <= VB1R;
       else if(PxOut < (HBOut + AIPOut -2))
-        nextState = ResetVB1R;
+        nextState <= ResetVB1R;
     end
 
     //40
     ResetVB1R: begin
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = ResetVB1G;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= ResetVB1G;
     end
 
     //41
     ResetVB1G: begin
-      SelBlank = 1;
-      WE0 = 1;
+      SelBlank <= 1;
+      WE0 <= 1;
       if(LineOut < (VBOut - 1))
-        nextState = ResetVB1B;
+        nextState <= ResetVB1B;
       else if(LineOut == (VBOut - 1))
-        nextState = Switch1VBtoHB;
+        nextState <= Switch1VBtoHB;
     end
 
     //42
     ResetVB1R: begin
-      ResetPx = 1;
-      IncLine = 1;
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = VB1R;
+      ResetPx <= 1;
+      IncLine <= 1;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= VB1R;
     end
 
     //43
     Switch1VBtoHB: begin
-      ResetPx = 1;
-      ResetLine = 1;
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = SyncHB1A;
+      ResetPx <= 1;
+      ResetLine <= 1;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= SyncHB1A;
     end
 
     //44
     SyncHB1A: begin
-      SyncHB = 1;
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = HB1G;
+      SyncHB <= 1;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= HB1G;
     end
 
     //45
     HB1R: begin
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = HB1G;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= HB1G;
     end
 
     //46
     HB1R: begin
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = HB1B;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= HB1B;
     end
 
     //47
     HB1B: begin
-      IncPx = 1;
-      SelBlank = 1;
-      WE0 = 1;
+      IncPx <= 1;
+      SelBlank <= 1;
+      WE0 <= 1;
       if(PxOut < (HBOut - 2))
-      nextState = HB1R;
+      nextState <= HB1R;
       else if(PxOut == (HBOut - 2))
-      nextState = ResetHB1R;
+      nextState <= ResetHB1R;
     end
 
     //48
     ResetHB1R: begin
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = ResetHB1G;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= ResetHB1G;
     end
 
     //49
     ResetHB1G: begin
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = ResetHB1B;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= ResetHB1B;
     end
 
     //50
     ResetHB1B: begin
-      ResetPx = 1;
-      SelBlank = 1;
-      RE1 = 1;
-      WE0 = 1;
-      nextState = R1;
+      ResetPx <= 1;
+      SelBlank <= 1;
+      RE1 <= 1;
+      WE0 <= 1;
+      nextState <= R1;
     end
 
     //51
     R1: begin
-      SelR1 = 1;
-      SelBuf1 = 1;
-      RE1 = 1;
-      WE0 = 1;
-      nextState = G1;
+      SelR1 <= 1;
+      SelBuf1 <= 1;
+      RE1 <= 1;
+      WE0 <= 1;
+      nextState <= G1;
     end
 
     //52
     G1: begin
-      SelG1 = 1;
-      SelBuf1 = 1;
-      RE1 = 1;
-      IncAddr1 = 1;
-      WE0 = 1;
-      nextState = B1;
+      SelG1 <= 1;
+      SelBuf1 <= 1;
+      RE1 <= 1;
+      IncAddr1 <= 1;
+      WE0 <= 1;
+      nextState <= B1;
     end
 
     //53
     G1: begin
-      IncPx = 1;
-      SelB1 = 1;
-      SelBuf1 = 1;
-      RE1 = 1;
-      WE0 = 1;
+      IncPx <= 1;
+      SelB1 <= 1;
+      SelBuf1 <= 1;
+      RE1 <= 1;
+      WE0 <= 1;
       if(PxOut < (HBOut - 2))
-      nextState = R1;
+      nextState <= R1;
       else if(PxOut == (HBOut - 2))
-      nextState = ResetR1;
+      nextState <= ResetR1;
     end
 
     //54
     ResetR1: begin
-      SelR1 = 1;
-      SelBuf1 = 1;
-      RE1 = 1;
-      WE0 = 1;
-      nextState = ResetG1;
+      SelR1 <= 1;
+      SelBuf1 <= 1;
+      RE1 <= 1;
+      WE0 <= 1;
+      nextState <= ResetG1;
     end
 
     //55
     ResetG1: begin
-      SelG1 = 1;
-      SelBuf1 = 1;
-      RE1 = 1;
-      WE0 = 1;
-      nextState = ResetB1;
+      SelG1 <= 1;
+      SelBuf1 <= 1;
+      RE1 <= 1;
+      WE0 <= 1;
+      nextState <= ResetB1;
     end
 
     //56
     ResetB1: begin
-      ResetPx = 1;
-      IncLine = 1;
-      SelB1 = 1;
-      SelBuf1 = 1;
-      WE0 = 1;
+      ResetPx <= 1;
+      IncLine <= 1;
+      SelB1 <= 1;
+      SelBuf1 <= 1;
+      WE0 <= 1;
       if(LineOut < (AILOut - 2))
-        nextState = SyncHB1;
+        nextState <= SyncHB1;
       else if(LineOut == (AILOut - 2))
-        nextState = SyncHB1B;
+        nextState <= SyncHB1B;
     end
 
     //57
     SyncHB1: begin
-      SyncHB = 1;
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = HB1G;
+      SyncHB <= 1;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= HB1G;
     end
 
     //58
     SyncHB1B: begin
-      SyncHB = 1;
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = LastHB1G;
+      SyncHB <= 1;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= LastHB1G;
     end
 
     //59
     LastHB1R: begin
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = LastHB1G;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= LastHB1G;
     end
 
     //60
     LastHB1R: begin
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = LastHB1B;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= LastHB1B;
     end
 
     //61
     LastHB1B: begin
-      IncPx = 1;
-      SelBlank = 1;
-      WE0 = 1;
+      IncPx <= 1;
+      SelBlank <= 1;
+      WE0 <= 1;
       if(PxOut < (HBOut - 2))
-      nextState = LastHB1R;
+      nextState <= LastHB1R;
       else if(PxOut == (HBOut - 2))
-      nextState = ResetLastHB1R;
+      nextState <= ResetLastHB1R;
     end
 
     //62
     ResetLastHB1R: begin
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = ResetLastHB1G;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= ResetLastHB1G;
     end
 
     //63
     ResetLastHB1G: begin
-      SelBlank = 1;
-      WE0 = 1;
-      nextState = ResetLastHB1B;
+      SelBlank <= 1;
+      WE0 <= 1;
+      nextState <= ResetLastHB1B;
     end
 
     //64
     ResetLastHB1B: begin
-      ResetPx = 1;
-      SelBlank = 1;
-      RE1 = 1;
-      WE0 = 1;
-      nextState = LastR1;
+      ResetPx <= 1;
+      SelBlank <= 1;
+      RE1 <= 1;
+      WE0 <= 1;
+      nextState <= LastR1;
     end
 
     //65
     LastR1: begin
-      SelR1 = 1;
-      SelBuf1 = 1;
-      RE1 = 1;
-      WE0 = 1;
-      nextState = LastG1;
+      SelR1 <= 1;
+      SelBuf1 <= 1;
+      RE1 <= 1;
+      WE0 <= 1;
+      nextState <= LastG1;
     end
 
     //66
     LastG1: begin
-      SelG1 = 1;
-      SelBuf1 = 1;
-      RE1 = 1;
-      IncAddr1 = 1;
-      WE0 = 1;
-      nextState = LastB1;
+      SelG1 <= 1;
+      SelBuf1 <= 1;
+      RE1 <= 1;
+      IncAddr1 <= 1;
+      WE0 <= 1;
+      nextState <= LastB1;
     end
 
     //67
     LastG1: begin
-      IncPx = 1;
-      SelB1 = 1;
-      SelBuf1 = 1;
-      RE1 = 1;
-      WE0 = 1;
+      IncPx <= 1;
+      SelB1 <= 1;
+      SelBuf1 <= 1;
+      RE1 <= 1;
+      WE0 <= 1;
       if(PxOut < (AIPOut - 2))
-      nextState = LastR1;
+      nextState <= LastR1;
       else if(PxOut == (AIPOut - 2))
-      nextState = ResetLastR1;
+      nextState <= ResetLastR1;
     end
 
     //68
     ResetLastR1: begin
-      SelR1 = 1;
-      SelBuf1 = 1;
-      RE1 = 1;
-      WE0 = 1;
-      nextState = ResetLastG1;
+      SelR1 <= 1;
+      SelBuf1 <= 1;
+      RE1 <= 1;
+      WE0 <= 1;
+      nextState <= ResetLastG1;
     end
 
     //69
     ResetLastG1: begin
-      SelG1 = 1;
-      SelBuf1 = 1;
-      RE1 = 1;
-      ResetAddr1 = 1;
-      WE0 = 1;
-      nextState = ResetLastB1;
+      SelG1 <= 1;
+      SelBuf1 <= 1;
+      RE1 <= 1;
+      ResetAddr1 <= 1;
+      WE0 <= 1;
+      nextState <= ResetLastB1;
     end
 
     //70
     ResetLastB1: begin
-      ResetLine = 1;
-      ResetPx = 1;
-      SelB1 = 1;
-      SelBuf1 = 1;
-      WE0 = 1;
-      nextState = START0;
+      ResetLine <= 1;
+      ResetPx <= 1;
+      SelB1 <= 1;
+      SelBuf1 <= 1;
+      WE0 <= 1;
+      nextState <= START0;
     end
  endcase
 end
