@@ -10,7 +10,7 @@ module Addr0_counter(Addr0, clk, ResetAddr0, IncAddr0,);
     Addr0 = 0;
   end
 
-  always @(posedge clk or ResetAddr0)
+  always @(posedge clk or posedge ResetAddr0)
   begin
     if(ResetAddr0==1) begin
       Addr0 <= 0;

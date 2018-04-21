@@ -1,16 +1,16 @@
 module pixel_counter(PxOut, clk, ResetPx, IncPx,);
   input clk, ResetPx, IncPx ;
   wire clk, ResetPx, IncPx ;
-  
+
   output [9:0] PxOut;
-  reg [9:0] PxOut = 0;
+  reg [9:0] PxOut;
 
   initial
   begin
     PxOut = 0;
   end
 
-  always @(posedge clk or ResetPx)
+  always @(posedge clk or posedge ResetPx)
   begin
     if(ResetPx==1) begin
       PxOut <= 0;

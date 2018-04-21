@@ -110,9 +110,9 @@ begin
       SelBlank <= 1;
       WE1 <= 1;
       //check else condition if code does not run properly
-      if(PxOut < (HBOut + AIPOut -10))
+      if(PxOut < (HBOut + AIPOut - 2)) // Here -2 to detect second last pixel
         nextState <= VB0R;
-      else if(PxOut == (HBOut + AIPOut -10))
+      else if(PxOut == (HBOut + AIPOut - 2)) // Here -2 to detect second last pixel
         nextState <= ResetVB0R;
     end
 
@@ -160,6 +160,9 @@ begin
       SyncHB <= 1;
       SelBlank <= 1;
       WE1 <= 1;
+      //complementary cases
+      ResetPx <= 0;
+      ResetLine <= 0;
       nextState <= HB0G;
     end
 
@@ -167,13 +170,17 @@ begin
     HB0R: begin
       SelBlank <= 1;
       WE1 <= 1;
+      //complementary cases
+      IncPx <= 0;
       nextState <= HB0G;
     end
 
     //11
-    HB0R: begin
+    HB0G: begin
       SelBlank <= 1;
       WE1 <= 1;
+      //complementary cases
+      SyncHB <= 0;
       nextState <= HB0B;
     end
 
@@ -192,6 +199,8 @@ begin
     ResetHB0R: begin
       SelBlank <= 1;
       WE1 <= 1;
+      //complementary cases
+      IncPx <= 0;
       nextState <= ResetHB0G;
     end
 
