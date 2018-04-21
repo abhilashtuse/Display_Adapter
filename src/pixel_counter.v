@@ -10,9 +10,9 @@ module pixel_counter(PxOut, clk, ResetPx, IncPx,);
     PxOut = 0;
   end
 
-  always @(posedge clk or posedge ResetPx)
+  always @(posedge clk)
   begin
-    if(ResetPx==1) begin
+    if(ResetPx == 1) begin
       PxOut <= 0;
     end
     else begin

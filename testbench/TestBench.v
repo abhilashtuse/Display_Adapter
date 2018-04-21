@@ -28,7 +28,7 @@ module test_DataPath;
         begin
           reset = 1;
           #2 reset = 0; CSDisplay= 0; signal = 1; imageNumber = 1;
-          repeat(10000)#2;
+          repeat(9996)#2;
           #2  CSDisplay= 1;
           repeat(50000)#2;
           $finish;

@@ -13,7 +13,7 @@ reg [0:2639]frame[0:109];
 reg [0:2639]temp;
 reg count = 0;
 
-always@ (posedge clk && FrameIn)
+always@ (posedge clk)
 begin
   if(count == 0) begin
   temp[0:7] = FrameIn;

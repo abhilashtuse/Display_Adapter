@@ -10,7 +10,7 @@ module line_counter(LineOut, clk, ResetLine, IncLine,);
     LineOut = 0;
   end
 
-  always @(posedge clk or posedge ResetLine)
+  always @(posedge clk )
   begin
     if(ResetLine == 1) begin
       LineOut <= 0;

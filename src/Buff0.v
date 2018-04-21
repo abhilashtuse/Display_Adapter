@@ -24,16 +24,15 @@ module Buf0(R0,B0,G0,RE0,WE0,Addr0,WData, clk, reset);
         R0 = 0;
   	  end
       else begin
-        if(WE0 == 1 && RE0 == 0) begin
-          buff0[Addr0] = WData;
+        if(WE0 == 1) begin
+          buff0[Addr0] = WData[23:0];
         end
-        if(WE0 == 0 && RE0 == 1) begin
-        result = buff0[Addr0];
+        if(RE0 == 1) begin
+          result = buff0[Addr0];
           R0 = result[7:0];
           G0 = result[15:8];
           B0 = result[23:16];
         end
       end
     end
-
 endmodule

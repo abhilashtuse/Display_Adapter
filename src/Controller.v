@@ -70,7 +70,7 @@ begin
           Inc0Flag <= 1;
         end
         else begin
-          IncAddr0 <= 0;
+          IncAddr0 <= 1;
         end
       end
     end
@@ -82,6 +82,9 @@ begin
       SyncVB <= 1;
       WE0 <= 0;
       WE1 <= 1;
+      //complementary cases
+      IncAddr0 <= 0;
+      ResetAddr0 <= 1;
       nextState <= VB0G;
     end
 
@@ -91,6 +94,7 @@ begin
       WE1 <= 1;
 
       //complementary cases
+      ResetAddr0 <= 0;
       IncPx <= 0;
       IncLine <= 0;
       ResetPx <= 0;
@@ -101,6 +105,8 @@ begin
     VB0G: begin
       SelBlank <= 1;
       WE1 <= 1;
+      //complementary cases
+      SyncVB <= 0;
       nextState <= VB0B;
     end
 
@@ -226,6 +232,11 @@ begin
       SelBuf0 <= 1;
       RE0 <= 1;
       WE1 <= 1;
+      //complementary cases
+      IncPx <= 0;
+      SelBlank <= 0;
+      SelB0 <= 0;
+      ResetPx <= 0;
       nextState <= G0;
     end
 
@@ -236,16 +247,21 @@ begin
       RE0 <= 1;
       IncAddr0 <= 1;
       WE1 <= 1;
+      //complementary cases
+      SelR0 <= 0;
       nextState <= B0;
     end
 
     //18
-    G0: begin
+    B0: begin
       IncPx <= 1;
       SelB0 <= 1;
       SelBuf0 <= 1;
       RE0 <= 1;
       WE1 <= 1;
+      //complementary cases
+      IncAddr0 <= 0;
+      SelG0 <= 0;
       if(PxOut < (HBOut - 2))
       nextState <= R0;
       else if(PxOut == (HBOut - 2))
@@ -258,6 +274,9 @@ begin
       SelBuf0 <= 1;
       RE0 <= 1;
       WE1 <= 1;
+      //complementary cases
+      SelB0 <= 0;
+      IncPx <= 0;
       nextState <= ResetG0;
     end
 
@@ -267,6 +286,8 @@ begin
       SelBuf0 <= 1;
       RE0 <= 1;
       WE1 <= 1;
+      //complementary cases
+      SelR0 <= 0;
       nextState <= ResetB0;
     end
 
@@ -277,6 +298,9 @@ begin
       SelB0 <= 1;
       SelBuf0 <= 1;
       WE1 <= 1;
+      //complementary cases
+      SelG0 <= 0;
+      RE0 <= 0;
       if(LineOut < (AILOut - 2))
         nextState <= SyncHB0;
       else if(LineOut == (AILOut - 2))
@@ -288,6 +312,11 @@ begin
       SyncHB <= 1;
       SelBlank <= 1;
       WE1 <= 1;
+      //complementary cases
+      ResetPx <= 0;
+      IncLine <= 0;
+      SelB0 <= 0;
+      SelBuf0 <= 0;
       nextState <= HB0G;
     end
 
@@ -296,6 +325,11 @@ begin
       SyncHB <= 1;
       SelBlank <= 1;
       WE1 <= 1;
+      //complementary cases
+      ResetPx <= 0;
+      IncLine <= 0;
+      SelB0 <= 0;
+      SelBuf0 <= 0;
       nextState <= LastHB0G;
     end
 
@@ -303,13 +337,17 @@ begin
     LastHB0R: begin
       SelBlank <= 1;
       WE1 <= 1;
+      //complementary cases
+      IncPx <= 0;
       nextState <= LastHB0G;
     end
 
     //25
-    LastHB0R: begin
+    LastHB0G: begin
       SelBlank <= 1;
       WE1 <= 1;
+      //complementary cases
+      SyncHB <= 0;
       nextState <= LastHB0B;
     end
 
@@ -327,8 +365,10 @@ begin
     //27
     ResetLastHB0R: begin
       SelBlank <= 1;
-      nextState <= ResetLastHB0G;
       WE1 <= 1;
+      //complementary cases
+      IncPx <= 0;
+      nextState <= ResetLastHB0G;
     end
 
     //28
@@ -353,6 +393,11 @@ begin
       SelBuf0 <= 1;
       RE0 <= 1;
       WE1 <= 1;
+      //complementary cases
+      ResetPx <= 0; // coming from state 29
+      SelBlank <= 0; // coming from state 29
+      IncPx <= 0; // coming from state 32
+      SelB0 <= 0; // coming from state 32
       nextState <= LastG0;
     end
 
@@ -362,17 +407,22 @@ begin
       SelBuf0 <= 1;
       RE0 <= 1;
       IncAddr0 <= 1;
+      //complementary cases
+      SelR0 <= 0;
       nextState <= LastB0;
       WE1 <= 1;
     end
 
     //32
-    LastG0: begin
+    LastB0: begin
       IncPx <= 1;
       SelB0 <= 1;
       SelBuf0 <= 1;
       RE0 <= 1;
       WE1 <= 1;
+      //complementary cases
+      IncAddr0 <= 0;
+      SelG0 <= 0;
       if(PxOut < (AIPOut - 2))
       nextState <= LastR0;
       else if(PxOut == (AIPOut - 2))
@@ -385,6 +435,9 @@ begin
       SelBuf0 <= 1;
       RE0 <= 1;
       WE1 <= 1;
+      //complementary cases
+      IncPx <= 0;
+      SelB0 <= 0;
       nextState <= ResetLastG0;
     end
 
@@ -395,6 +448,8 @@ begin
       RE0 <= 1;
       ResetAddr0 <= 1;
       WE1 <= 1;
+      //complementary cases
+      SelR0 <= 0;
       nextState <= ResetLastB0;
     end
 
@@ -405,6 +460,10 @@ begin
       SelB0 <= 1;
       SelBuf0 <= 1;
       WE1 <= 1;
+      //complementary cases
+      SelG0 <= 0;
+      RE0 <= 0;
+      ResetAddr0 <= 0;
       nextState <= START1;
     end
 
@@ -416,6 +475,11 @@ begin
       nextState <= VB1G;
       WE0 <= 1;
       WE1 <= 0;
+      //complementary cases
+      ResetLine <= 0;
+      ResetPx <= 0;
+      SelB0 <= 0;
+      SelBuf0 <= 0;
     end
 
     //37
