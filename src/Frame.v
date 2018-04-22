@@ -1,13 +1,15 @@
-module Frame(FrameIn, PxOut, LineOut, clk, readFrame, FrameDataOut, readLineOutCounter, IncIndex);
+module Frame(FrameIn, PxOut, LineOut, clk, readFrame, FrameDataOut, IncIndex, FrameWInd);
 input [7:0]FrameIn;
 input [9:0]PxOut;
-input [9:0]LineOut,readLineOutCounter;
+input [9:0]LineOut;
 input clk, reset, readFrame;
 input IncIndex;
+input [15:0]FrameWInd;
 
 wire [7:0]FrameIn;
 wire [9:0]PxOut;
-wire [9:0]LineOut,readLineOutCounter;
+wire [9:0]LineOut;
+wire [15:0]FrameWInd;
 wire clk, reset, readFrame;
 wire IncIndex;
 
@@ -24,12 +26,11 @@ begin
   index = 0;
 end
 
-
 always@ (posedge clk )
 begin
   if(readFrame) begin
-    FrameDataOut = frame[readLineOutCounter + 10];
-    //$display("line count: %d ", readLineOutCounter + 10);
+    FrameDataOut = frame[3329];
+    //$display("FrameDataOut:%h",FrameDataOut);
   end
 end
 
@@ -37,7 +38,10 @@ always@ (posedge clk)
 begin
     index <= index + IncIndex;
     frame[index] <= FrameIn;
-    if(index == 36300)
-     index <= 0;
+    if(index == 36298) begin
+      $display("Index:%d",index);
+      //$writememh("frame_file.txt", frame);
+      index <= 0;
+    end
 end
 endmodule

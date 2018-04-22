@@ -1,18 +1,19 @@
-module DataPath(WData, HBOut_PD, VBOut_PD, AIPOut_PD, AILOut_PD, CSDisplay,clk, reset, readFrame, FrameDataOut, FrameReadIncLine, FrameReadResetLine);
+module DataPath(WData, HBOut_PD, VBOut_PD, AIPOut_PD, AILOut_PD, CSDisplay,clk, reset, readFrame, FrameDataOut, FrameWInd);
 input [31:0]WData;
 input [9:0]VBOut_PD;
 input [9:0]HBOut_PD;
 input [9:0]AIPOut_PD;
 input [9:0]AILOut_PD;
 input clk, reset, CSDisplay;
+input [15:0]FrameWInd;
 
 //reading fram
 input readFrame;
-input FrameReadIncLine, FrameReadResetLine;
-wire readFrame,FrameReadIncLine, FrameReadResetLine;
+wire readFrame;
 
 //reading fram
 output [0:2639]FrameDataOut;
+wire [15:0]FrameWInd;
 wire [0:2639]FrameDataOut;
 wire [9:0]readLineOutCounter;
 
@@ -27,8 +28,6 @@ reg [9:0]VBOut;
 reg [9:0]HBOut;
 reg [9:0]AIPOut;
 reg [9:0]AILOut;
-
-
 
 wire [7:0]R0,B0,G0,R1,B1,G1,FrameIn,Buf0,Buf1;
 wire [19:0]Addr0,Addr1;
@@ -64,9 +63,8 @@ FrameMUX frameMUX(.FrameIn(FrameIn), .Buf0(Buf0), .Buf1(Buf1), .SelBuf0(SelBuf0)
 
 pixel_counter p_counter(.PxOut(PxOut), .clk(clk), .ResetPx(ResetPx), .IncPx(IncPx));
 line_counter l_counter(.LineOut(LineOut), .clk(clk), .ResetLine(ResetLine), .IncLine(IncLine));
-line_counter l_counterFrameRead(.LineOut(readLineOutCounter), .clk(clk), .ResetLine(FrameReadResetLine), .IncLine(FrameReadIncLine));
-Frame frame(.FrameIn(FrameIn), .PxOut(PxOut), .LineOut(LineOut), .clk(clk), .readFrame(readFrame), .FrameDataOut(FrameDataOut), .readLineOutCounter(readLineOutCounter), .IncIndex(IncIndex));
-
+//line_counter l_counterFrameRead(.LineOut(readLineOutCounter), .clk(clk), .ResetLine(FrameReadResetLine), .IncLine(FrameReadIncLine));
+Frame frame(.FrameIn(FrameIn), .PxOut(PxOut), .LineOut(LineOut), .clk(clk), .readFrame(readFrame), .FrameDataOut(FrameDataOut), .IncIndex(IncIndex), .FrameWInd(FrameWInd));
 
 Controller controller(.PxOut(PxOut), .LineOut(LineOut),.VBOut(VBOut_PD),.HBOut(HBOut_PD),.AIPOut(AIPOut_PD),.AILOut(AILOut_PD),.CSDisplay(CSDisplay),.RE0(RE0),.WE0(WE0),.RE1(RE1),.WE1(WE1),
 .SelR0(SelR0),.SelG0(SelG0),.SelB0(SelB0),.SelR1(SelR1),.SelG1(SelG1),.SelB1(SelB1),.SelBuf0(SelBuf0), .SelBlank(SelBlank), .SelBuf1(SelBuf1), .IncPx(IncPx), .ResetPx(ResetPx), .IncLine(IncLine), .ResetLine(ResetLine),

@@ -13,10 +13,10 @@ reg [7:0]FrameIn;
 always @ (Buf0 or Buf1 or SelBuf0 or SelBlank or SelBuf1)
 begin
   if(SelBuf0 == 1 && SelBlank == 0 && SelBuf1 == 0)
-    FrameIn = Buf0;
+    FrameIn <= Buf0;
   else if(SelBuf0 == 0 && SelBlank == 1 && SelBuf1 == 0)
-    FrameIn = 0;//BK
+    FrameIn <= 0;//BK
   else if(SelBuf0 == 0 && SelBlank == 0 && SelBuf1 == 1)
-    FrameIn = Buf1;
+    FrameIn <= Buf1;
 end
 endmodule

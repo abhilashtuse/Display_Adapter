@@ -64,17 +64,25 @@ begin
       if(CSDisplay == 1) begin
         nextState <= START0;
         WE0 <= 0;
+        IncAddr0 <= 0;
+        Inc0Flag <= 0;
+        ResetAddr0 <= 1;
       end
       else begin
-        nextState <= IDLE;
-        WE0 <= 1;
-        WE1 <= 0;
-        if(Inc0Flag == 0) begin
-          IncAddr0 <= 0;
-          Inc0Flag <= 1;
+        if(reset == 1) begin
+          Inc0Flag <= 0;
         end
         else begin
-          IncAddr0 <= 1;
+          nextState <= IDLE;
+          WE0 <= 1;
+          WE1 <= 0;
+          if(Inc0Flag == 0) begin
+            IncAddr0 <= 0;
+            Inc0Flag <= 1;
+          end
+          else begin
+            IncAddr0 <= 1;
+          end
         end
       end
     end
@@ -86,6 +94,7 @@ begin
       SyncVB <= 1;
       WE0 <= 0;
       WE1 <= 1;
+      IncIndex <= 1;
       //complementary cases
       IncAddr0 <= 0;
       ResetAddr0 <= 1;
@@ -109,7 +118,6 @@ begin
     VB0G: begin
       SelBlank <= 1;
       WE1 <= 1;
-      IncIndex <= 1;
       //complementary cases
       SyncVB <= 0;
       nextState <= VB0B;
@@ -143,8 +151,6 @@ begin
     ResetVB0G: begin
       SelBlank <= 1;
       WE1 <= 1;
-
-
       if(LineOut < (VBOut - 1))
         nextState <= ResetVB0B;
       else if(LineOut == (VBOut - 1))
@@ -274,9 +280,9 @@ begin
       //complementary cases
       IncAddr0 <= 0;
       SelG0 <= 0;
-      if(PxOut < (HBOut - 2))
+      if(PxOut < (AIPOut - 2))
       nextState <= R0;
-      else if(PxOut == (HBOut - 2))
+      else if(PxOut == (AIPOut - 2))
       nextState <= ResetR0;
     end
 
@@ -298,6 +304,7 @@ begin
       SelBuf0 <= 1;
       RE0 <= 1;
       WE1 <= 1;
+      IncAddr0 <= 1;
       //complementary cases
       SelR0 <= 0;
       nextState <= ResetB0;
@@ -311,6 +318,7 @@ begin
       SelBuf0 <= 1;
       WE1 <= 1;
       //complementary cases
+      IncAddr0 <= 0;
       SelG0 <= 0;
       RE0 <= 0;
       if(LineOut < (AILOut - 2))
@@ -360,7 +368,7 @@ begin
     LastHB0G: begin
       SelBlank <= 1;
       WE1 <= 1;
-      IncIndex <= 0;
+      IncIndex <= 1;
       //complementary cases
       SyncHB <= 0;
       nextState <= LastHB0B;
@@ -487,10 +495,11 @@ begin
       SelBlank <= 1;
       Buf1Empty <= 1;
       SyncVB <= 1;
-      nextState <= VB1G;
+      nextState <= START1; //VB1G; done for testing
       WE0 <= 1;
       WE1 <= 0;
       //complementary cases
+      IncIndex <= 0;
       ResetLine <= 0;
       ResetPx <= 0;
       SelB0 <= 0;

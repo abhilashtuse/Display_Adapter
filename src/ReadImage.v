@@ -9,7 +9,7 @@ module ReadImage(clk,fout,imageNumber, signal);
   reg [31:0]fout;
   integer count1;
   integer rfileId, wfileId, i, ret_val;
-  reg [23:0] image1[9999:0];
+  reg [7:0] image1[29999:0];
   reg [7:0]  image2[29999:0];
   reg [7:0]  image3[29999:0];
   reg [7:0]  image4[29999:0];
@@ -29,20 +29,6 @@ module ReadImage(clk,fout,imageNumber, signal);
     end*/
     $fclose(rfileId);
 
-    //Read Image2
-    rfileId = $fopen("headless_sample.bmp", "rb");
-    ret_val = $fread(image2, rfileId);
-    $fclose(rfileId);
-
-    //Read Image3
-    rfileId = $fopen("headless_sample.bmp", "rb");
-    ret_val = $fread(image3, rfileId);
-    $fclose(rfileId);
-
-    //Read Image4
-    rfileId = $fopen("headless_sample.bmp", "rb");
-    ret_val = $fread(image4, rfileId);
-    $fclose(rfileId);
     count1 = 0;
     fout = 0;
   end
@@ -50,8 +36,8 @@ module ReadImage(clk,fout,imageNumber, signal);
   always@ (posedge clk)
   begin
     if(imageNumber == 1 && signal == 1) begin
-      fout[23:0] = image1[count1];
-      count1 = count1+1;
+      fout[23:0] = {image1[count1 + 2],image1[count1 + 1],image1[count1]};
+      count1 = count1 + 3;
     end
   end
 endmodule
