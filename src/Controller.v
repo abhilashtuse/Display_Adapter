@@ -1,6 +1,6 @@
 module Controller(PxOut, LineOut,VBOut,HBOut,AIPOut,AILOut,CSDisplay,RE0,WE0,RE1,WE1,
 SelR0,SelG0,SelB0,SelR1,SelG1,SelB1,SelBuf0, SelBlank, SelBuf1, IncPx, ResetPx, IncLine, ResetLine,
-SyncHB, SyncVB, Buf0Empty,Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1, clk, reset);
+SyncHB, SyncVB, Buf0Empty,Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1, clk, reset, IncIndex);
 
   input [9:0]PxOut;
   input [9:0]LineOut;
@@ -16,13 +16,13 @@ SyncHB, SyncVB, Buf0Empty,Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1,
   wire [9:0]HBOut;
   wire [9:0]AIPOut;
   wire [9:0]AILOut;
-wire CSDisplay, reset, clk;
+  wire CSDisplay, reset, clk;
   output RE0,WE0,RE1,WE1,SelR0,SelG0,SelB0,SelR1,SelG1,SelB1,SelBuf0, SelBlank,
          SelBuf1, IncPx, ResetPx, IncLine, ResetLine,SyncHB, SyncVB, Buf0Empty,
-         Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1;
+         Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1, IncIndex;
   reg RE0,WE0,RE1,WE1,SelR0,SelG0,SelB0,SelR1,SelG1,SelB1,SelBuf0, SelBlank,
          SelBuf1, IncPx, ResetPx, IncLine, ResetLine,SyncHB, SyncVB, Buf0Empty,
-         Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1;
+         Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1,IncIndex;
 
   reg Inc0Flag;
   reg [6:0] state, nextState;
@@ -49,11 +49,15 @@ begin
 
   RE0 = 0;WE0 = 0;RE1 = 0;WE1 = 0;SelR0 = 0;SelG0 = 0;SelB0 = 0;SelR1 = 0;SelG1 = 0;SelB1 = 0;SelBuf0 = 0; SelBlank = 0;
   SelBuf1 = 0; IncPx = 0; ResetPx = 0; IncLine = 0; ResetLine = 0;SyncHB = 0; SyncVB = 0; IncAddr0 = 0;
-  ResetAddr0 = 0; IncAddr1 = 0; ResetAddr1 = 0;
+  ResetAddr0 = 0; IncAddr1 = 0; ResetAddr1 = 0; IncIndex = 0;
 end
 
 always @(*) // always block to compute output
 begin
+  if(CSDisplay == 0) begin
+    nextState <= IDLE;
+  end
+
  case(state)
     //0
     IDLE: begin
@@ -105,6 +109,7 @@ begin
     VB0G: begin
       SelBlank <= 1;
       WE1 <= 1;
+      IncIndex <= 1;
       //complementary cases
       SyncVB <= 0;
       nextState <= VB0B;
@@ -115,7 +120,9 @@ begin
       IncPx <= 1;
       SelBlank <= 1;
       WE1 <= 1;
+
       //check else condition if code does not run properly
+        //$display("PxOut: %d  (HBOut + AIPOut - 2):%d", PxOut, (HBOut + AIPOut - 2));
       if(PxOut < (HBOut + AIPOut - 2)) // Here -2 to detect second last pixel
         nextState <= VB0R;
       else if(PxOut == (HBOut + AIPOut - 2)) // Here -2 to detect second last pixel
@@ -126,10 +133,9 @@ begin
     ResetVB0R: begin
       SelBlank <= 1;
       WE1 <= 1;
-
       //complementary cases
       IncPx <= 0;
-
+      //$display("PxOut: %d  (HBOut + AIPOut - 2):%d", PxOut, (HBOut + AIPOut - 2));
       nextState <= ResetVB0G;
     end
 
@@ -137,6 +143,8 @@ begin
     ResetVB0G: begin
       SelBlank <= 1;
       WE1 <= 1;
+
+
       if(LineOut < (VBOut - 1))
         nextState <= ResetVB0B;
       else if(LineOut == (VBOut - 1))
@@ -146,6 +154,7 @@ begin
     //7
     ResetVB0B: begin
       ResetPx <= 1;
+      //$display("In state 7: %d", PxOut);
       IncLine <= 1;
       SelBlank <= 1;
       nextState <= VB0R;
@@ -158,6 +167,7 @@ begin
       ResetLine <= 1;
       SelBlank <= 1;
       WE1 <= 1;
+      IncIndex <=0;
       nextState <= SyncHB0A;
     end
 
@@ -166,6 +176,7 @@ begin
       SyncHB <= 1;
       SelBlank <= 1;
       WE1 <= 1;
+      IncIndex <=0;
       //complementary cases
       ResetPx <= 0;
       ResetLine <= 0;
@@ -185,6 +196,7 @@ begin
     HB0G: begin
       SelBlank <= 1;
       WE1 <= 1;
+      IncIndex <= 1;
       //complementary cases
       SyncHB <= 0;
       nextState <= HB0B;
@@ -312,6 +324,7 @@ begin
       SyncHB <= 1;
       SelBlank <= 1;
       WE1 <= 1;
+      IncIndex <= 0;
       //complementary cases
       ResetPx <= 0;
       IncLine <= 0;
@@ -325,6 +338,7 @@ begin
       SyncHB <= 1;
       SelBlank <= 1;
       WE1 <= 1;
+      IncIndex <= 0;
       //complementary cases
       ResetPx <= 0;
       IncLine <= 0;
@@ -346,6 +360,7 @@ begin
     LastHB0G: begin
       SelBlank <= 1;
       WE1 <= 1;
+      IncIndex <= 0;
       //complementary cases
       SyncHB <= 0;
       nextState <= LastHB0B;
