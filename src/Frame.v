@@ -38,7 +38,7 @@ always@ (posedge clk)
 begin
     index <= index + IncIndex;
     frame[index] <= FrameIn;
-    if(index == 36298) begin
+    if(index == 36299) begin
       $display("Index:%d",index);
       //$writememh("frame_file.txt", frame);
       index <= 0;

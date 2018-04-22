@@ -173,7 +173,7 @@ begin
       ResetLine <= 1;
       SelBlank <= 1;
       WE1 <= 1;
-      IncIndex <=0;
+      //IncIndex <=0;
       nextState <= SyncHB0A;
     end
 
@@ -182,7 +182,7 @@ begin
       SyncHB <= 1;
       SelBlank <= 1;
       WE1 <= 1;
-      IncIndex <=0;
+      //IncIndex <=1;
       //complementary cases
       ResetPx <= 0;
       ResetLine <= 0;
@@ -202,7 +202,6 @@ begin
     HB0G: begin
       SelBlank <= 1;
       WE1 <= 1;
-      IncIndex <= 1;
       //complementary cases
       SyncHB <= 0;
       nextState <= HB0B;
@@ -332,7 +331,6 @@ begin
       SyncHB <= 1;
       SelBlank <= 1;
       WE1 <= 1;
-      IncIndex <= 0;
       //complementary cases
       ResetPx <= 0;
       IncLine <= 0;
@@ -346,7 +344,6 @@ begin
       SyncHB <= 1;
       SelBlank <= 1;
       WE1 <= 1;
-      IncIndex <= 0;
       //complementary cases
       ResetPx <= 0;
       IncLine <= 0;
