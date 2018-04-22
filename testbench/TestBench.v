@@ -10,7 +10,7 @@ module test_DataPath;
   reg [2:0]imageNumber;
   reg [15:0]FrameWInd;
 
-  wire [0:2639]FrameDataOut;
+  wire [7:0]FrameDataOut;
   reg readFrame, FrameReadIncLine, FrameReadResetLine;
   ReadImage read (.clk(clk),.fout(WData),.imageNumber(imageNumber),.signal(signal));
   DataPath dataPath(.WData(WData), .HBOut_PD(HBOut_PD), .VBOut_PD(VBOut_PD), .AIPOut_PD(AIPOut_PD), .AILOut_PD(AILOut_PD), .CSDisplay(CSDisplay), .clk(clk), .reset(reset) , .readFrame(readFrame), .FrameDataOut(FrameDataOut), .FrameWInd(FrameWInd));
@@ -41,11 +41,10 @@ module test_DataPath;
           #2  CSDisplay= 1;
           repeat(40000)#2; // Transfer from buffer 0 to Frame
           #2 CSDisplay= 0; readFrame = 1; FrameReadResetLine = 1;FrameReadIncLine = 0; write = 1;
-          #2 FrameWInd = FrameWInd + 1;
-          repeat(99) #2; // Write Frame data to output file
 
-          write = 0; FrameReadIncLine = 0;
-          repeat(10) #2;
+          repeat(30000) #2 FrameWInd = FrameWInd + 1; // Write Frame data to output file
+
+          #2 write = 0; FrameWInd = 0; readFrame = 0;
           $finish;
         end
 

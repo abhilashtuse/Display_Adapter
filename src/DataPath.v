@@ -12,9 +12,9 @@ input readFrame;
 wire readFrame;
 
 //reading fram
-output [0:2639]FrameDataOut;
+output [7:0]FrameDataOut;
 wire [15:0]FrameWInd;
-wire [0:2639]FrameDataOut;
+wire [7:0]FrameDataOut;
 wire [9:0]readLineOutCounter;
 
 wire [31:0]WData;

@@ -1,8 +1,8 @@
 module WriteImage(FrameDataOut, write, clk);
-input [0:2639]FrameDataOut;
+input [7:0]FrameDataOut;
 input write,clk;
 wire write,clk;
-wire [0:2639]FrameDataOut;
+wire [7:0]FrameDataOut;
   integer wfileId, i, count;
   reg [7:0]  aaa[29999:0];
   reg [31:0] val;
@@ -17,8 +17,8 @@ always @(posedge clk)
 begin
   if(write)begin
       for (i = 0; i < 300; i = i + 1) begin
-        temp = FrameDataOut << (i * 8 + 240);
-        aaa[count] = temp[0:7];
+        //temp = FrameDataOut;
+        aaa[count] = FrameDataOut;
         count = count + 1;
       end
   //    $display("count:%d",count);

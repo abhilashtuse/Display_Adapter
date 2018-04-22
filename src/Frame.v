@@ -13,12 +13,13 @@ wire [15:0]FrameWInd;
 wire clk, reset, readFrame;
 wire IncIndex;
 
-output [0:2639]FrameDataOut;
-reg [0:2639]FrameDataOut;
+output [7:0]FrameDataOut;
+reg [7:0]FrameDataOut [29999:0];
+reg [31:0] val;
 
 reg [7:0]frame[36299:0];
-//reg [0:2639]temp;
-integer index;
+integer index, temp1, temp2, i;
+integer wfileId;
 
 initial
 begin
@@ -29,8 +30,23 @@ end
 always@ (posedge clk )
 begin
   if(readFrame) begin
-    FrameDataOut = frame[3329];
-    //$display("FrameDataOut:%h",FrameDataOut);
+    temp1 = FrameWInd % 300;
+    temp2 = FrameWInd / 300;
+    FrameDataOut = frame[3330 + temp1 + 330*temp2];
+    if ((3330 + temp1 + 330*temp2) == 36299) begin
+      $display("Frame Index:%d",3330 + temp1 + 330*temp2);
+      wfileId = $fopen("new_headless_sample.bmp", "wb");
+      if (!wfileId) begin
+          $display("Cannot open file to write");
+          $finish;
+      end
+
+      for (i = 0; i < 30000; i = i + 4) begin
+          val = {FrameDataOut[i+3], FrameDataOut[i+2], FrameDataOut[i+1], FrameDataOut[i]};
+          $fwrite(wfileId, "%u", val);
+      end
+      $fclose(wfileId);
+    end
   end
 end
 
