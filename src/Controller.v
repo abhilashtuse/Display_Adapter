@@ -1,3 +1,4 @@
+`timescale 1fs/1fs
 module Controller(PxOut, LineOut,VBOut,HBOut,AIPOut,AILOut,CSDisplay,RE0,WE0,RE1,WE1,
 SelR0,SelG0,SelB0,SelR1,SelG1,SelB1,SelBuf0, SelBlank, SelBuf1, IncPx, ResetPx, IncLine, ResetLine,
 SyncHB, SyncVB, Buf0Empty,Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1, clk, reset, IncIndex);

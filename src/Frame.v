@@ -1,4 +1,5 @@
-module Frame(FrameIn, PxOut, LineOut, clk, readFrame, FrameDataOut, IncIndex, FrameWInd);
+`timescale 1fs/1fs
+module Frame(FrameIn, PxOut, LineOut, clk, readFrame, IncIndex, FrameWInd);
 input [7:0]FrameIn;
 input [9:0]PxOut;
 input [9:0]LineOut;
@@ -13,7 +14,6 @@ wire [15:0]FrameWInd;
 wire clk, reset, readFrame;
 wire IncIndex;
 
-output [7:0]FrameDataOut;
 reg [7:0]FrameDataOut [29999:0];
 reg [31:0] val;
 
@@ -32,9 +32,11 @@ begin
   if(readFrame) begin
     temp1 = FrameWInd % 300;
     temp2 = FrameWInd / 300;
-    FrameDataOut = frame[3330 + temp1 + 330*temp2];
-    if ((3330 + temp1 + 330*temp2) == 36299) begin
-      $display("Frame Index:%d",3330 + temp1 + 330*temp2);
+    FrameDataOut[FrameWInd] = frame[3330 + temp1 + 330*temp2];
+
+  //  $display("Frame Index:%d  %h",(3330 + temp1 + 330*temp2), FrameDataOut[FrameWInd]);
+    if ((3330 + temp1 + 330*temp2) == 36330) begin
+      //$display("Frame Index:%d",3330 + temp1 + 330*temp2);
       wfileId = $fopen("new_headless_sample.bmp", "wb");
       if (!wfileId) begin
           $display("Cannot open file to write");

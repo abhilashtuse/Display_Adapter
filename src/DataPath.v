@@ -1,4 +1,5 @@
-module DataPath(WData, HBOut_PD, VBOut_PD, AIPOut_PD, AILOut_PD, CSDisplay,clk, reset, readFrame, FrameDataOut, FrameWInd);
+`timescale 1fs/1fs
+module DataPath(WData, HBOut_PD, VBOut_PD, AIPOut_PD, AILOut_PD, CSDisplay,clk, reset, readFrame, FrameWInd);
 input [31:0]WData;
 input [9:0]VBOut_PD;
 input [9:0]HBOut_PD;
@@ -12,9 +13,7 @@ input readFrame;
 wire readFrame;
 
 //reading fram
-output [7:0]FrameDataOut;
 wire [15:0]FrameWInd;
-wire [7:0]FrameDataOut;
 wire [9:0]readLineOutCounter;
 
 wire [31:0]WData;
@@ -64,7 +63,7 @@ FrameMUX frameMUX(.FrameIn(FrameIn), .Buf0(Buf0), .Buf1(Buf1), .SelBuf0(SelBuf0)
 pixel_counter p_counter(.PxOut(PxOut), .clk(clk), .ResetPx(ResetPx), .IncPx(IncPx));
 line_counter l_counter(.LineOut(LineOut), .clk(clk), .ResetLine(ResetLine), .IncLine(IncLine));
 //line_counter l_counterFrameRead(.LineOut(readLineOutCounter), .clk(clk), .ResetLine(FrameReadResetLine), .IncLine(FrameReadIncLine));
-Frame frame(.FrameIn(FrameIn), .PxOut(PxOut), .LineOut(LineOut), .clk(clk), .readFrame(readFrame), .FrameDataOut(FrameDataOut), .IncIndex(IncIndex), .FrameWInd(FrameWInd));
+Frame frame(.FrameIn(FrameIn), .PxOut(PxOut), .LineOut(LineOut), .clk(clk), .readFrame(readFrame), .IncIndex(IncIndex), .FrameWInd(FrameWInd));
 
 Controller controller(.PxOut(PxOut), .LineOut(LineOut),.VBOut(VBOut_PD),.HBOut(HBOut_PD),.AIPOut(AIPOut_PD),.AILOut(AILOut_PD),.CSDisplay(CSDisplay),.RE0(RE0),.WE0(WE0),.RE1(RE1),.WE1(WE1),
 .SelR0(SelR0),.SelG0(SelG0),.SelB0(SelB0),.SelR1(SelR1),.SelG1(SelG1),.SelB1(SelB1),.SelBuf0(SelBuf0), .SelBlank(SelBlank), .SelBuf1(SelBuf1), .IncPx(IncPx), .ResetPx(ResetPx), .IncLine(IncLine), .ResetLine(ResetLine),

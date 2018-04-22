@@ -1,3 +1,4 @@
+`timescale 1fs/1fs
 module WriteImage(FrameDataOut, write, clk);
 input [7:0]FrameDataOut;
 input write,clk;

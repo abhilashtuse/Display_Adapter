@@ -1,3 +1,4 @@
+`timescale 1fs/1fs
 module line_counter(LineOut, clk, ResetLine, IncLine,);
   input clk, ResetLine, IncLine ;
 

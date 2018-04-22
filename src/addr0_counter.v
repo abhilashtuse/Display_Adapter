@@ -1,3 +1,4 @@
+`timescale 1fs/1fs
 module Addr0_counter(Addr0, clk, ResetAddr0, IncAddr0,);
   input clk, ResetAddr0, IncAddr0;
   wire clk, ResetAddr0, IncAddr0;

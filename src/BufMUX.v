@@ -1,3 +1,4 @@
+`timescale 1fs/1fs
 module BufMUX(Buf, R, G, B, SelR, SelG, SelB);
 input  SelR, SelG, SelB;
 input [7:0]R, G, B;

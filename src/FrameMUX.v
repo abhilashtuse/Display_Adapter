@@ -1,3 +1,4 @@
+`timescale 1fs/1fs
 module FrameMUX(FrameIn, Buf0, Buf1, SelBuf0, SelBlank, SelBuf1);
 input SelBuf0, SelBlank, SelBuf1;
 input [7:0]Buf0;

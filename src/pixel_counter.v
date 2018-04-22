@@ -1,3 +1,4 @@
+`timescale 1fs/1fs
 module pixel_counter(PxOut, clk, ResetPx, IncPx,);
   input clk, ResetPx, IncPx ;
   wire clk, ResetPx, IncPx ;

@@ -1,3 +1,4 @@
+`timescale 1fs/1fs
 module ReadImage(clk,fout,imageNumber, signal);
   input clk,signal;
   input [2:0] imageNumber;
@@ -37,6 +38,7 @@ module ReadImage(clk,fout,imageNumber, signal);
   begin
     if(imageNumber == 1 && signal == 1) begin
       fout[23:0] = {image1[count1 + 2],image1[count1 + 1],image1[count1]};
+      //$display("Addr: %d    fout:%h", count1, fout[23:0]);
       count1 = count1 + 3;
     end
   end
