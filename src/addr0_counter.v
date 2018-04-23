@@ -1,8 +1,10 @@
 `timescale 1fs/1fs
 module Addr0_counter(Addr0, clk, ResetAddr0, IncAddr0,);
+  //inputs
   input clk, ResetAddr0, IncAddr0;
   wire clk, ResetAddr0, IncAddr0;
 
+  //outputs
   output [19:0] Addr0;
   reg [19:0] Addr0 = 0;
 
@@ -11,7 +13,7 @@ module Addr0_counter(Addr0, clk, ResetAddr0, IncAddr0,);
     Addr0 = 0;
   end
 
-  always @(posedge clk )
+  always @(posedge clk)
   begin
     if(ResetAddr0 == 1) begin
       Addr0 <= 0;
