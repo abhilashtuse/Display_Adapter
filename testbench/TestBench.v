@@ -1,3 +1,4 @@
+`timescale 1fs/1fs
 module test_DataPath;
   integer i;
   wire [31:0]WData;
@@ -5,16 +6,18 @@ module test_DataPath;
   reg [9:0]HBOut_PD;
   reg [9:0]AIPOut_PD;
   reg [9:0]AILOut_PD;
-  reg CSDisplay, clk, reset;
-  reg signal, write;
+  reg CSDisplay, clk, reset,write;
+  wire Buf1Empty,Buf0Empty;
   reg [2:0]imageNumber;
   reg [15:0]FrameWInd;
 
   wire [7:0]FrameDataOut;
   reg readFrame, FrameReadIncLine, FrameReadResetLine;
-  ReadImage read (.clk(clk),.fout(WData),.imageNumber(imageNumber),.signal(signal));
-  DataPath dataPath(.WData(WData), .HBOut_PD(HBOut_PD), .VBOut_PD(VBOut_PD), .AIPOut_PD(AIPOut_PD), .AILOut_PD(AILOut_PD), .CSDisplay(CSDisplay), .clk(clk), .reset(reset) , .readFrame(readFrame), .FrameDataOut(FrameDataOut), .FrameWInd(FrameWInd));
-  WriteImage write_im(.FrameDataOut(FrameDataOut), .write(write), .clk(clk));
+  ReadImage read (.clk(clk),.fout(WData),.imageNumber(imageNumber),.Buf1Empty(Buf1Empty),.Buf0Empty(Buf0Empty));
+  DataPath dataPath(.WData(WData), .HBOut_PD(HBOut_PD), .VBOut_PD(VBOut_PD), .AIPOut_PD(AIPOut_PD),
+   .AILOut_PD(AILOut_PD), .CSDisplay(CSDisplay), .clk(clk), .reset(reset) , .readFrame(readFrame),
+  .FrameWInd(FrameWInd),.Buf1Empty(Buf1Empty),.Buf0Empty(Buf0Empty));
+  //WriteImage write_im(.FrameDataOut(FrameDataOut), .write(write), .clk(clk));
 
  initial
         begin
@@ -35,16 +38,18 @@ module test_DataPath;
     initial
         begin
           reset = 1;
-          #2 reset = 0; CSDisplay= 0; signal = 1; imageNumber = 1;
+          #2 reset = 0; CSDisplay= 0; imageNumber = 1;
           repeat(9999)#2; // Fill Buffer 0
 
           #2  CSDisplay= 1;
-          repeat(40000)#2; // Transfer from buffer 0 to Frame
+          #2  imageNumber = 2;
+          repeat(39999)#2; // Transfer from buffer 0 to Frame
           #2 CSDisplay= 0; readFrame = 1; FrameReadResetLine = 1;FrameReadIncLine = 0; write = 1;
 
           repeat(30000) #2 FrameWInd = FrameWInd + 1; // Write Frame data to output file
 
           #2 write = 0; FrameWInd = 0; readFrame = 0;
+          #2;
           $finish;
         end
 

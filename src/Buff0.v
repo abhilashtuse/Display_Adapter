@@ -1,5 +1,5 @@
 `timescale 1fs/1fs
-module Buf0(R0,B0,G0,RE0,WE0,Addr0,WData, clk, reset);
+module Buf0(R0,B0,G0,RE0,WE0,Addr0,WData, clk, reset,Buffer0Full);
   input RE0,WE0, clk, reset;
   input [19:0]Addr0;
   input [31:0] WData;
@@ -11,12 +11,14 @@ module Buf0(R0,B0,G0,RE0,WE0,Addr0,WData, clk, reset);
   output [7:0]R0;
   output [7:0]B0;
   output [7:0]G0;
+  output Buffer0Full;
 
   reg [7:0]R0;
   reg [7:0]B0;
   reg [7:0]G0;
   reg [23:0] buff0[9999:0];
   reg [23:0]result;
+  reg Buffer0Full;
 
   always @ (posedge clk)
     begin
@@ -25,8 +27,12 @@ module Buf0(R0,B0,G0,RE0,WE0,Addr0,WData, clk, reset);
             buff0[Addr0 + 1] <= WData[23:0];
             $display("Addr: %d Buffer1: %h   Wdata:%h", Addr0, buff0[Addr0],WData[23:0]);
             if(Addr0 == 9999)begin
+              Buffer0Full <= 0;
               $display("Befor dumping buf0");
               $writememh("Buf0Dump.bmp",buff0);
+            end
+            else begin
+              Buffer0Full <= 0;
             end
         end
   end

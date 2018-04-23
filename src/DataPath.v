@@ -1,5 +1,5 @@
 `timescale 1fs/1fs
-module DataPath(WData, HBOut_PD, VBOut_PD, AIPOut_PD, AILOut_PD, CSDisplay,clk, reset, readFrame, FrameWInd);
+module DataPath(WData, HBOut_PD, VBOut_PD, AIPOut_PD, AILOut_PD, CSDisplay,clk, reset, readFrame, FrameWInd, Buf1Empty,Buf0Empty);
 input [31:0]WData;
 input [9:0]VBOut_PD;
 input [9:0]HBOut_PD;
@@ -8,6 +8,7 @@ input [9:0]AILOut_PD;
 input clk, reset, CSDisplay;
 input [15:0]FrameWInd;
 
+output Buf1Empty,Buf0Empty;
 //reading fram
 input readFrame;
 wire readFrame;
@@ -21,7 +22,7 @@ wire [9:0]VBOut_PD;
 wire [9:0]HBOut_PD;
 wire [9:0]AIPOut_PD;
 wire [9:0]AILOut_PD;
-wire clk, reset, CSDisplay, IncIndex;
+wire clk, reset, CSDisplay, IncIndex, Buf1Empty,Buf0Empty,Buffer0Full,Buffer1Full;
 
 reg [9:0]VBOut;
 reg [9:0]HBOut;
@@ -51,11 +52,11 @@ wire SelR0,SelG0,SelB0,SelR1,SelG1,SelB1;
 wire IncPx,IncLine;
 
 Addr0_counter addr0(.Addr0(Addr0), .clk(clk), .ResetAddr0(ResetAddr0), .IncAddr0(IncAddr0));
-Buf0 buf0(.R0(R0),.B0(B0),.G0(G0),.RE0(RE0),.WE0(WE0),.Addr0(Addr0),.WData(WData), .clk(clk), .reset(reset));
+Buf0 buf0(.R0(R0),.B0(B0),.G0(G0),.RE0(RE0),.WE0(WE0),.Addr0(Addr0),.WData(WData), .clk(clk), .reset(reset) ,.Buffer0Full(Buffer0Full));
 BufMUX bufMUX0(.Buf(Buf0), .R(R0), .G(G0), .B(B0), .SelR(SelR0), .SelG(SelG0), .SelB(SelB0));
 
-Addr1_counter addr1(.Addr1(Addr1), .clk(clk), .ResetAddr1(ResetAddr0), .IncAddr1(IncAddr1));
-Buf1 buf1(.R1(R1),.B1(B1),.G1(G1),.RE1(RE1),.WE1(WE1),.Addr1(Addr1),.WData(WData), .clk(clk), .reset(reset));
+Addr1_counter addr1(.Addr1(Addr1), .clk(clk), .ResetAddr1(ResetAddr1), .IncAddr1(IncAddr1));
+Buf1 buf1(.R1(R1),.B1(B1),.G1(G1),.RE1(RE1),.WE1(WE1),.Addr1(Addr1),.WData(WData), .clk(clk), .reset(reset), .Buffer1Full(Buffer1Full));
 BufMUX bufMUX1(.Buf(Buf1), .R(R1), .G(G1), .B(B1), .SelR(SelR1), .SelG(SelG1), .SelB(SelB1));
 
 FrameMUX frameMUX(.FrameIn(FrameIn), .Buf0(Buf0), .Buf1(Buf1), .SelBuf0(SelBuf0), .SelBlank(SelBlank), .SelBuf1(SelBuf1));
@@ -65,9 +66,12 @@ line_counter l_counter(.LineOut(LineOut), .clk(clk), .ResetLine(ResetLine), .Inc
 //line_counter l_counterFrameRead(.LineOut(readLineOutCounter), .clk(clk), .ResetLine(FrameReadResetLine), .IncLine(FrameReadIncLine));
 Frame frame(.FrameIn(FrameIn), .PxOut(PxOut), .LineOut(LineOut), .clk(clk), .readFrame(readFrame), .IncIndex(IncIndex), .FrameWInd(FrameWInd));
 
-Controller controller(.PxOut(PxOut), .LineOut(LineOut),.VBOut(VBOut_PD),.HBOut(HBOut_PD),.AIPOut(AIPOut_PD),.AILOut(AILOut_PD),.CSDisplay(CSDisplay),.RE0(RE0),.WE0(WE0),.RE1(RE1),.WE1(WE1),
-.SelR0(SelR0),.SelG0(SelG0),.SelB0(SelB0),.SelR1(SelR1),.SelG1(SelG1),.SelB1(SelB1),.SelBuf0(SelBuf0), .SelBlank(SelBlank), .SelBuf1(SelBuf1), .IncPx(IncPx), .ResetPx(ResetPx), .IncLine(IncLine), .ResetLine(ResetLine),
-.SyncHB(SyncHB), .SyncVB(SyncVB), .Buf0Empty(Buf0Empty),.Buf1Empty(Buf1Empty), .IncAddr0(IncAddr0), .ResetAddr0(ResetAddr0), .IncAddr1(IncAddr1), .ResetAddr1(ResetAddr1), .clk(clk), .reset(reset), .IncIndex(IncIndex));
+Controller controller(.PxOut(PxOut), .LineOut(LineOut),.VBOut(VBOut_PD),.HBOut(HBOut_PD),.AIPOut(AIPOut_PD),.AILOut(AILOut_PD),
+.CSDisplay(CSDisplay),.RE0(RE0),.WE0(WE0),.RE1(RE1),.WE1(WE1),.SelR0(SelR0),.SelG0(SelG0),.SelB0(SelB0),.SelR1(SelR1),
+.SelG1(SelG1),.SelB1(SelB1),.SelBuf0(SelBuf0), .SelBlank(SelBlank), .SelBuf1(SelBuf1), .IncPx(IncPx), .ResetPx(ResetPx),
+.IncLine(IncLine), .ResetLine(ResetLine),.SyncHB(SyncHB), .SyncVB(SyncVB), .Buf0Empty(Buf0Empty),.Buf1Empty(Buf1Empty),
+.IncAddr0(IncAddr0), .ResetAddr0(ResetAddr0), .IncAddr1(IncAddr1), .ResetAddr1(ResetAddr1), .clk(clk), .reset(reset),
+.IncIndex(IncIndex), .Buffer0Full(Buffer0Full) ,.Buffer1Full(Buffer1Full));
 
 /*initial
 begin

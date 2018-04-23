@@ -1,7 +1,7 @@
 `timescale 1fs/1fs
 module Controller(PxOut, LineOut,VBOut,HBOut,AIPOut,AILOut,CSDisplay,RE0,WE0,RE1,WE1,
 SelR0,SelG0,SelB0,SelR1,SelG1,SelB1,SelBuf0, SelBlank, SelBuf1, IncPx, ResetPx, IncLine, ResetLine,
-SyncHB, SyncVB, Buf0Empty,Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1, clk, reset, IncIndex);
+SyncHB, SyncVB, Buf0Empty,Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1, clk, reset, IncIndex,Buffer0Full, Buffer1Full);
 
   input [9:0]PxOut;
   input [9:0]LineOut;
@@ -9,7 +9,7 @@ SyncHB, SyncVB, Buf0Empty,Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1,
   input [9:0]HBOut;
   input [9:0]AIPOut;
   input [9:0]AILOut;
-  input CSDisplay, reset, clk;
+  input CSDisplay, reset, clk, Buffer0Full, Buffer1Full;
 
   wire [9:0]PxOut;
   wire [9:0]LineOut;
@@ -17,7 +17,7 @@ SyncHB, SyncVB, Buf0Empty,Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1,
   wire [9:0]HBOut;
   wire [9:0]AIPOut;
   wire [9:0]AILOut;
-  wire CSDisplay, reset, clk;
+  wire CSDisplay, reset, clk, Buffer0Full, Buffer1Full;
   output RE0,WE0,RE1,WE1,SelR0,SelG0,SelB0,SelR1,SelG1,SelB1,SelBuf0, SelBlank,
          SelBuf1, IncPx, ResetPx, IncLine, ResetLine,SyncHB, SyncVB, Buf0Empty,
          Buf1Empty, IncAddr0, ResetAddr0, IncAddr1, ResetAddr1, IncIndex;
@@ -50,7 +50,7 @@ begin
 
   RE0 = 0;WE0 = 0;RE1 = 0;WE1 = 0;SelR0 = 0;SelG0 = 0;SelB0 = 0;SelR1 = 0;SelG1 = 0;SelB1 = 0;SelBuf0 = 0; SelBlank = 0;
   SelBuf1 = 0; IncPx = 0; ResetPx = 0; IncLine = 0; ResetLine = 0;SyncHB = 0; SyncVB = 0; IncAddr0 = 0;
-  ResetAddr0 = 0; IncAddr1 = 0; ResetAddr1 = 0; IncIndex = 0;
+  ResetAddr0 = 0; IncAddr1 = 0; ResetAddr1 = 0; IncIndex = 0; Buf1Empty = 1;
 end
 
 always @(*) // always block to compute output
@@ -68,8 +68,10 @@ begin
         IncAddr0 <= 0;
         Inc0Flag <= 0;
         ResetAddr0 <= 1;
+        Buf0Empty <= 0;//fill buffer 0 first time  complete
       end
       else begin
+        Buf0Empty <= 1; //fill buffer 0 first time  complete
         if(reset == 1) begin
           Inc0Flag <= 0;
         end
@@ -93,9 +95,15 @@ begin
       SelBlank <= 1;
       Buf1Empty <= 1;
       SyncVB <= 1;
+      IncIndex <= 1;
+
+      //Writing buffer 1
       WE0 <= 0;
       WE1 <= 1;
-      IncIndex <= 1;
+      IncAddr1 <= 1;
+
+
+
       //complementary cases
       IncAddr0 <= 0;
       ResetAddr0 <= 1;
@@ -105,7 +113,10 @@ begin
     //2
     VB0R: begin
       SelBlank <= 1;
-      WE1 <= 1;
+
+
+      //buffer 1
+      IncAddr1 <= 1;
 
       //complementary cases
       ResetAddr0 <= 0;
@@ -118,7 +129,7 @@ begin
     //3
     VB0G: begin
       SelBlank <= 1;
-      WE1 <= 1;
+
       //complementary cases
       SyncVB <= 0;
       nextState <= VB0B;
@@ -128,7 +139,7 @@ begin
     VB0B: begin
       IncPx <= 1;
       SelBlank <= 1;
-      WE1 <= 1;
+
 
       //check else condition if code does not run properly
         //$display("PxOut: %d  (HBOut + AIPOut - 2):%d", PxOut, (HBOut + AIPOut - 2));
@@ -141,7 +152,7 @@ begin
     //5
     ResetVB0R: begin
       SelBlank <= 1;
-      WE1 <= 1;
+
       //complementary cases
       IncPx <= 0;
       //$display("PxOut: %d  (HBOut + AIPOut - 2):%d", PxOut, (HBOut + AIPOut - 2));
@@ -151,7 +162,7 @@ begin
     //6
     ResetVB0G: begin
       SelBlank <= 1;
-      WE1 <= 1;
+
       if(LineOut < (VBOut - 1))
         nextState <= ResetVB0B;
       else if(LineOut == (VBOut - 1))
@@ -165,7 +176,7 @@ begin
       IncLine <= 1;
       SelBlank <= 1;
       nextState <= VB0R;
-      WE1 <= 1;
+
     end
 
     //8
@@ -173,7 +184,7 @@ begin
       ResetPx <= 1;
       ResetLine <= 1;
       SelBlank <= 1;
-      WE1 <= 1;
+
       //IncIndex <=0;
       nextState <= SyncHB0A;
     end
@@ -182,7 +193,7 @@ begin
     SyncHB0A: begin
       SyncHB <= 1;
       SelBlank <= 1;
-      WE1 <= 1;
+
       //IncIndex <=1;
       //complementary cases
       ResetPx <= 0;
@@ -193,7 +204,7 @@ begin
     //10
     HB0R: begin
       SelBlank <= 1;
-      WE1 <= 1;
+
       //complementary cases
       IncPx <= 0;
       nextState <= HB0G;
@@ -202,7 +213,7 @@ begin
     //11
     HB0G: begin
       SelBlank <= 1;
-      WE1 <= 1;
+
       //complementary cases
       SyncHB <= 0;
       nextState <= HB0B;
@@ -212,7 +223,7 @@ begin
     HB0B: begin
       IncPx <= 1;
       SelBlank <= 1;
-      WE1 <= 1;
+
       if(PxOut < (HBOut - 2))
       nextState <= HB0R;
       else if(PxOut == (HBOut - 2))
@@ -222,7 +233,7 @@ begin
     //13
     ResetHB0R: begin
       SelBlank <= 1;
-      WE1 <= 1;
+
       //complementary cases
       IncPx <= 0;
       nextState <= ResetHB0G;
@@ -231,7 +242,7 @@ begin
     //14
     ResetHB0G: begin
       SelBlank <= 1;
-      WE1 <= 1;
+
       nextState <= ResetHB0B;
     end
 
@@ -240,7 +251,7 @@ begin
       ResetPx <= 1;
       SelBlank <= 1;
       RE0 <= 1;
-      WE1 <= 1;
+
       nextState <= R0;
     end
 
@@ -249,12 +260,17 @@ begin
       SelR0 <= 1;
       SelBuf0 <= 1;
       RE0 <= 1;
-      WE1 <= 1;
+
       //complementary cases
       IncPx <= 0;
       SelBlank <= 0;
       SelB0 <= 0;
       ResetPx <= 0;
+
+      //buffer 1 check
+      if(Buffer1Full) begin
+      IncAddr1 <= 0;
+      end
       nextState <= G0;
     end
 
@@ -264,9 +280,16 @@ begin
       SelBuf0 <= 1;
       RE0 <= 1;
       IncAddr0 <= 1;
-      WE1 <= 1;
+
       //complementary cases
       SelR0 <= 0;
+
+      //buffer 1 check
+      if(Buffer1Full) begin
+      WE1 <= 0;
+      IncAddr1 <= 0;
+      ResetAddr1 <= 0;
+      end
       nextState <= B0;
     end
 
@@ -276,7 +299,6 @@ begin
       SelB0 <= 1;
       SelBuf0 <= 1;
       RE0 <= 1;
-      WE1 <= 1;
       //complementary cases
       IncAddr0 <= 0;
       SelG0 <= 0;
@@ -291,7 +313,7 @@ begin
       SelR0 <= 1;
       SelBuf0 <= 1;
       RE0 <= 1;
-      WE1 <= 1;
+
       //complementary cases
       SelB0 <= 0;
       IncPx <= 0;
@@ -303,7 +325,7 @@ begin
       SelG0 <= 1;
       SelBuf0 <= 1;
       RE0 <= 1;
-      WE1 <= 1;
+
       IncAddr0 <= 1;
       //complementary cases
       SelR0 <= 0;
@@ -316,7 +338,7 @@ begin
       IncLine <= 1;
       SelB0 <= 1;
       SelBuf0 <= 1;
-      WE1 <= 1;
+
       //complementary cases
       IncAddr0 <= 0;
       SelG0 <= 0;
@@ -331,7 +353,7 @@ begin
     SyncHB0: begin
       SyncHB <= 1;
       SelBlank <= 1;
-      WE1 <= 1;
+
       //complementary cases
       ResetPx <= 0;
       IncLine <= 0;
@@ -344,7 +366,7 @@ begin
     SyncHB0B: begin
       SyncHB <= 1;
       SelBlank <= 1;
-      WE1 <= 1;
+
       //complementary cases
       ResetPx <= 0;
       IncLine <= 0;
@@ -356,7 +378,7 @@ begin
     //24
     LastHB0R: begin
       SelBlank <= 1;
-      WE1 <= 1;
+
       //complementary cases
       IncPx <= 0;
       nextState <= LastHB0G;
@@ -365,7 +387,7 @@ begin
     //25
     LastHB0G: begin
       SelBlank <= 1;
-      WE1 <= 1;
+
       IncIndex <= 1;
       //complementary cases
       SyncHB <= 0;
@@ -376,7 +398,7 @@ begin
     LastHB0B: begin
       IncPx <= 1;
       SelBlank <= 1;
-      WE1 <= 1;
+
       if(PxOut < (HBOut - 2))
       nextState <= LastHB0R;
       else if(PxOut == (HBOut - 2))
@@ -386,7 +408,7 @@ begin
     //27
     ResetLastHB0R: begin
       SelBlank <= 1;
-      WE1 <= 1;
+
       //complementary cases
       IncPx <= 0;
       nextState <= ResetLastHB0G;
@@ -395,7 +417,7 @@ begin
     //28
     ResetLastHB0G: begin
       SelBlank <= 1;
-      WE1 <= 1;
+
       nextState <= ResetLastHB0B;
     end
 
@@ -404,7 +426,7 @@ begin
       ResetPx <= 1;
       SelBlank <= 1;
       RE0 <= 1;
-      WE1 <= 1;
+
       nextState <= LastR0;
     end
 
@@ -413,7 +435,7 @@ begin
       SelR0 <= 1;
       SelBuf0 <= 1;
       RE0 <= 1;
-      WE1 <= 1;
+
       //complementary cases
       ResetPx <= 0; // coming from state 29
       SelBlank <= 0; // coming from state 29
@@ -431,7 +453,7 @@ begin
       //complementary cases
       SelR0 <= 0;
       nextState <= LastB0;
-      WE1 <= 1;
+
     end
 
     //32
@@ -440,7 +462,7 @@ begin
       SelB0 <= 1;
       SelBuf0 <= 1;
       RE0 <= 1;
-      WE1 <= 1;
+
       //complementary cases
       IncAddr0 <= 0;
       SelG0 <= 0;
@@ -455,7 +477,7 @@ begin
       SelR0 <= 1;
       SelBuf0 <= 1;
       RE0 <= 1;
-      WE1 <= 1;
+
       //complementary cases
       IncPx <= 0;
       SelB0 <= 0;
@@ -468,7 +490,7 @@ begin
       SelBuf0 <= 1;
       RE0 <= 1;
       ResetAddr0 <= 1;
-      WE1 <= 1;
+
       //complementary cases
       SelR0 <= 0;
       nextState <= ResetLastB0;
@@ -480,7 +502,7 @@ begin
       ResetPx <= 1;
       SelB0 <= 1;
       SelBuf0 <= 1;
-      WE1 <= 1;
+
       //complementary cases
       SelG0 <= 0;
       RE0 <= 0;
@@ -491,9 +513,9 @@ begin
     //36
     START1: begin
       SelBlank <= 1;
-      Buf1Empty <= 1;
+      Buf0Empty <= 1;
       SyncVB <= 1;
-      nextState <= START1; //VB1G; done for testing
+      nextState <= VB1G;
       WE0 <= 1;
       WE1 <= 0;
       //complementary cases
@@ -526,7 +548,7 @@ begin
       //check else condition if code does not run properly
       if(PxOut < (HBOut + AIPOut -2))
         nextState <= VB1R;
-      else if(PxOut < (HBOut + AIPOut -2))
+      else if(PxOut == (HBOut + AIPOut -2))
         nextState <= ResetVB1R;
     end
 
@@ -548,7 +570,7 @@ begin
     end
 
     //42
-    ResetVB1R: begin
+    ResetVB1B: begin
       ResetPx <= 1;
       IncLine <= 1;
       SelBlank <= 1;
@@ -581,7 +603,7 @@ begin
     end
 
     //46
-    HB1R: begin
+    HB1G: begin
       SelBlank <= 1;
       WE0 <= 1;
       nextState <= HB1B;
@@ -641,15 +663,15 @@ begin
     end
 
     //53
-    G1: begin
+    B1: begin
       IncPx <= 1;
       SelB1 <= 1;
       SelBuf1 <= 1;
       RE1 <= 1;
       WE0 <= 1;
-      if(PxOut < (HBOut - 2))
+      if(PxOut < (AIPOut - 2))
       nextState <= R1;
-      else if(PxOut == (HBOut - 2))
+      else if(PxOut == (AIPOut - 2))
       nextState <= ResetR1;
     end
 
@@ -708,7 +730,7 @@ begin
     end
 
     //60
-    LastHB1R: begin
+    LastHB1G: begin
       SelBlank <= 1;
       WE0 <= 1;
       nextState <= LastHB1B;
@@ -768,7 +790,7 @@ begin
     end
 
     //67
-    LastG1: begin
+    LastB1: begin
       IncPx <= 1;
       SelB1 <= 1;
       SelBuf1 <= 1;
