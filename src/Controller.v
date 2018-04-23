@@ -93,9 +93,8 @@ begin
     //1
      START0: begin
       SelBlank <= 1;
-      Buf1Empty <= 1;
+    //  Buf1Empty <= 1; //image 2 testing
       SyncVB <= 1;
-      IncIndex <= 1;
 
       //Writing buffer 1
       WE0 <= 0;
@@ -103,7 +102,6 @@ begin
       IncAddr1 <= 1;
       IncAddr0 <= 0;
       ResetAddr0 <= 1;
-
 
       //complementary cases
       IncIndex <= 0;
@@ -134,6 +132,7 @@ begin
     //3
     VB0G: begin
       SelBlank <= 1;
+      IncIndex <= 1;
 
       //complementary cases
       SyncVB <= 0;
@@ -190,7 +189,7 @@ begin
       ResetLine <= 1;
       SelBlank <= 1;
 
-      //IncIndex <=0;
+      IncIndex <=0;
       nextState <= SyncHB0A;
     end
 
@@ -199,7 +198,7 @@ begin
       SyncHB <= 1;
       SelBlank <= 1;
 
-      //IncIndex <=1;
+      IncIndex <=1;
       //complementary cases
       ResetPx <= 0;
       ResetLine <= 0;
@@ -345,6 +344,7 @@ begin
       SelBuf0 <= 1;
 
       //complementary cases
+      IncIndex <= 0;
       IncAddr0 <= 0;
       SelG0 <= 0;
       RE0 <= 0;
@@ -358,6 +358,7 @@ begin
     SyncHB0: begin
       SyncHB <= 1;
       SelBlank <= 1;
+      IncIndex <= 1;
 
       //complementary cases
       ResetPx <= 0;
@@ -371,6 +372,7 @@ begin
     SyncHB0B: begin
       SyncHB <= 1;
       SelBlank <= 1;
+      IncIndex <= 1;
 
       //complementary cases
       ResetPx <= 0;
@@ -393,7 +395,6 @@ begin
     LastHB0G: begin
       SelBlank <= 1;
 
-      IncIndex <= 1;
       //complementary cases
       SyncHB <= 0;
       nextState <= LastHB0B;
@@ -509,6 +510,7 @@ begin
       SelBuf0 <= 1;
 
       //complementary cases
+      IncIndex <= 0;
       SelG0 <= 0;
       RE0 <= 0;
       ResetAddr0 <= 0;
@@ -518,10 +520,9 @@ begin
     //36
     START1: begin
       SelBlank <= 1;
-    //  Buf0Empty <= 1;
+    //  Buf0Empty <= 1; //image testing
       SyncVB <= 1;
-      IncIndex <= 1;
-      nextState <= VB1G;
+      nextState <= START1; //VB1G;
 
       //Writing to buffer 0
       WE0 <= 1;
@@ -556,7 +557,7 @@ begin
     //38
     VB1G: begin
       SelBlank <= 1;
-
+      IncIndex <= 1;
       //complementary cases
       SyncVB <= 0;
       nextState <= VB1B;
@@ -605,6 +606,8 @@ begin
       ResetPx <= 1;
       ResetLine <= 1;
       SelBlank <= 1;
+      // Complementary cases
+      IncIndex <= 0;
       nextState <= SyncHB1A;
     end
 
@@ -612,6 +615,7 @@ begin
     SyncHB1A: begin
       SyncHB <= 1;
       SelBlank <= 1;
+      IncIndex <= 1;
 
       //complementary cases
       ResetPx <= 0;
@@ -756,6 +760,7 @@ begin
       SelBuf1 <= 1;
 
       //complementary cases
+      IncIndex <= 0;
       IncAddr1 <= 0;
       SelG1 <= 0;
       RE1 <= 0;
@@ -770,6 +775,7 @@ begin
     SyncHB1: begin
       SyncHB <= 1;
       SelBlank <= 1;
+      IncIndex <= 1;
 
       //complementary cases
       ResetPx <= 0;
@@ -783,6 +789,7 @@ begin
     SyncHB1B: begin
       SyncHB <= 1;
       SelBlank <= 1;
+      IncIndex <= 1;
 
       //complementary cases
       ResetPx <= 0;
@@ -805,7 +812,6 @@ begin
     //60
     LastHB1G: begin
       SelBlank <= 1;
-      IncIndex <= 1;
 
       //complementary cases
       SyncHB <= 0;
@@ -915,6 +921,7 @@ begin
       SelB1 <= 1;
       SelBuf1 <= 1;
       //complementary cases
+      IncIndex <= 0;
       SelG1 <= 0;
       RE1 <= 0;
       ResetAddr1 <= 0;

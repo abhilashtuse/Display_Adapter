@@ -30,8 +30,8 @@ module Buf0(R0,B0,G0,RE0,WE0,Addr0,WData, clk, reset,Buffer0Full, Buf0Empty);
             //$display("Addr: %d Buffer0: %h   Wdata:%h", Addr0, buff0[Addr0],WData[23:0]);
             if(Addr0 == 9999)begin
               Buffer0Full = 1;
-              $display("Before dumping buf0");
-              $writememh("Buf0Dump.bmp",buff0);
+              //$display("Before dumping buf0");
+              //$writememh("Buf0Dump.bmp",buff0);
             end
             else begin
               Buffer0Full = 0;

@@ -30,7 +30,6 @@ module test_DataPath;
             write = 0;
             readFrame = 0;
             FrameWInd = 0;
-            $display("In TestBench HBOut:%d",HBOut_PD);
             clk = 1;
             forever #1 clk= !clk;
         end
@@ -43,8 +42,8 @@ module test_DataPath;
 
           #2  CSDisplay= 1;
           #2  imageNumber = 2;
-          repeat(39999)#2; // Transfer from buffer 0 to Frame
-          repeat(39999) #2;//Transfer from buffer 1 to Frame
+          repeat(36298)#2; // Transfer from buffer 0 to Frame
+          //repeat(36507) #2;//Transfer from buffer 1 to Frame
 
 
 
@@ -55,7 +54,7 @@ module test_DataPath;
 
 
 
-          #2 CSDisplay= 0; readFrame = 1; write = 1;
+          #2 readFrame = 1; write = 1; CSDisplay= 0;
 
           repeat(30000) #2 FrameWInd = FrameWInd + 1; // Write Frame data to output file
 
