@@ -44,7 +44,18 @@ module test_DataPath;
           #2  CSDisplay= 1;
           #2  imageNumber = 2;
           repeat(39999)#2; // Transfer from buffer 0 to Frame
-          #2 CSDisplay= 0; readFrame = 1; FrameReadResetLine = 1;FrameReadIncLine = 0; write = 1;
+          repeat(39999) #2;//Transfer from buffer 1 to Frame
+
+
+
+
+
+
+
+
+
+
+          #2 CSDisplay= 0; readFrame = 1; write = 1;
 
           repeat(30000) #2 FrameWInd = FrameWInd + 1; // Write Frame data to output file
 

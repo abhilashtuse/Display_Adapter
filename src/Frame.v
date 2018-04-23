@@ -34,9 +34,9 @@ begin
     temp2 = FrameWInd / 300;
     FrameDataOut[FrameWInd] = frame[3330 + temp1 + 330*temp2];
 
-  //  $display("Frame Index:%d  %h",(3330 + temp1 + 330*temp2), FrameDataOut[FrameWInd]);
+    //$display("Frame Index:%d  %h",(3330 + temp1 + 330*temp2), FrameDataOut[FrameWInd]);
     if ((3330 + temp1 + 330*temp2) == 36330) begin
-      //$display("Frame Index:%d",3330 + temp1 + 330*temp2);
+      $display("Frame Index:%d",3330 + temp1 + 330*temp2);
       wfileId = $fopen("new_headless_sample.bmp", "wb");
       if (!wfileId) begin
           $display("Cannot open file to write");

@@ -50,7 +50,7 @@ begin
 
   RE0 = 0;WE0 = 0;RE1 = 0;WE1 = 0;SelR0 = 0;SelG0 = 0;SelB0 = 0;SelR1 = 0;SelG1 = 0;SelB1 = 0;SelBuf0 = 0; SelBlank = 0;
   SelBuf1 = 0; IncPx = 0; ResetPx = 0; IncLine = 0; ResetLine = 0;SyncHB = 0; SyncVB = 0; IncAddr0 = 0;
-  ResetAddr0 = 0; IncAddr1 = 0; ResetAddr1 = 0; IncIndex = 0; Buf1Empty = 1;
+  ResetAddr0 = 0; IncAddr1 = 0; ResetAddr1 = 0; IncIndex = 0; Buf1Empty = 1; Buf0Empty = 1;
 end
 
 always @(*) // always block to compute output
@@ -101,12 +101,17 @@ begin
       WE0 <= 0;
       WE1 <= 1;
       IncAddr1 <= 1;
-
+      IncAddr0 <= 0;
+      ResetAddr0 <= 1;
 
 
       //complementary cases
-      IncAddr0 <= 0;
-      ResetAddr0 <= 1;
+      IncIndex <= 0;
+      ResetLine <= 0;
+      ResetPx <= 0;
+      SelB1 <= 0;
+      SelBuf1 <= 0;
+
       nextState <= VB0G;
     end
 
@@ -513,13 +518,20 @@ begin
     //36
     START1: begin
       SelBlank <= 1;
-      Buf0Empty <= 1;
+    //  Buf0Empty <= 1;
       SyncVB <= 1;
+      IncIndex <= 1;
       nextState <= VB1G;
+
+      //Writing to buffer 0
       WE0 <= 1;
       WE1 <= 0;
+      IncAddr0 <= 1;
+
+
       //complementary cases
-      IncIndex <= 0;
+      IncAddr1 <=0;
+      ResetAddr1 <=1;
       ResetLine <= 0;
       ResetPx <= 0;
       SelB0 <= 0;
@@ -529,14 +541,24 @@ begin
     //37
     VB1R: begin
       SelBlank <= 1;
-      WE0 <= 1;
+
+      //buffer 0
+      IncAddr0 <= 1;
+
+      //complementary cases
+      ResetAddr1 <= 0;
+      IncPx <= 0;
+      IncLine <= 0;
+      ResetPx <= 0;
       nextState <= VB1G;
     end
 
     //38
     VB1G: begin
       SelBlank <= 1;
-      WE0 <= 1;
+
+      //complementary cases
+      SyncVB <= 0;
       nextState <= VB1B;
     end
 
@@ -544,7 +566,6 @@ begin
     VB1B: begin
       IncPx <= 1;
       SelBlank <= 1;
-      WE0 <= 1;
       //check else condition if code does not run properly
       if(PxOut < (HBOut + AIPOut -2))
         nextState <= VB1R;
@@ -555,14 +576,16 @@ begin
     //40
     ResetVB1R: begin
       SelBlank <= 1;
-      WE0 <= 1;
+
+      //complementary cases
+      IncPx <= 0;
       nextState <= ResetVB1G;
     end
 
     //41
     ResetVB1G: begin
       SelBlank <= 1;
-      WE0 <= 1;
+
       if(LineOut < (VBOut - 1))
         nextState <= ResetVB1B;
       else if(LineOut == (VBOut - 1))
@@ -574,7 +597,6 @@ begin
       ResetPx <= 1;
       IncLine <= 1;
       SelBlank <= 1;
-      WE0 <= 1;
       nextState <= VB1R;
     end
 
@@ -583,7 +605,6 @@ begin
       ResetPx <= 1;
       ResetLine <= 1;
       SelBlank <= 1;
-      WE0 <= 1;
       nextState <= SyncHB1A;
     end
 
@@ -591,21 +612,27 @@ begin
     SyncHB1A: begin
       SyncHB <= 1;
       SelBlank <= 1;
-      WE0 <= 1;
+
+      //complementary cases
+      ResetPx <= 0;
+      ResetLine <= 0;
       nextState <= HB1G;
     end
 
     //45
     HB1R: begin
       SelBlank <= 1;
-      WE0 <= 1;
+
+      //complementary cases
+      IncPx <= 0;
       nextState <= HB1G;
     end
 
     //46
     HB1G: begin
       SelBlank <= 1;
-      WE0 <= 1;
+      //complementary cases
+      SyncHB <= 0;
       nextState <= HB1B;
     end
 
@@ -613,7 +640,6 @@ begin
     HB1B: begin
       IncPx <= 1;
       SelBlank <= 1;
-      WE0 <= 1;
       if(PxOut < (HBOut - 2))
       nextState <= HB1R;
       else if(PxOut == (HBOut - 2))
@@ -623,14 +649,15 @@ begin
     //48
     ResetHB1R: begin
       SelBlank <= 1;
-      WE0 <= 1;
+      //complementary cases
+      IncPx <= 0;
+
       nextState <= ResetHB1G;
     end
 
     //49
     ResetHB1G: begin
       SelBlank <= 1;
-      WE0 <= 1;
       nextState <= ResetHB1B;
     end
 
@@ -639,7 +666,6 @@ begin
       ResetPx <= 1;
       SelBlank <= 1;
       RE1 <= 1;
-      WE0 <= 1;
       nextState <= R1;
     end
 
@@ -648,7 +674,17 @@ begin
       SelR1 <= 1;
       SelBuf1 <= 1;
       RE1 <= 1;
-      WE0 <= 1;
+
+      //complementary cases
+      IncPx <= 0;
+      ResetPx <= 0;
+      SelBlank <= 0;
+      SelB1 <= 0;
+
+      //Buffer 0 check
+      if(Buffer0Full) begin
+        IncAddr0 <= 0;
+      end
       nextState <= G1;
     end
 
@@ -658,7 +694,16 @@ begin
       SelBuf1 <= 1;
       RE1 <= 1;
       IncAddr1 <= 1;
-      WE0 <= 1;
+
+      //complementary cases
+      SelR1 <= 0;
+
+      //Buffer 0 check
+      if(Buffer0Full) begin
+        WE0 <= 0;
+        IncAddr0 <= 0;
+        ResetAddr0 <= 0;
+      end
       nextState <= B1;
     end
 
@@ -668,7 +713,10 @@ begin
       SelB1 <= 1;
       SelBuf1 <= 1;
       RE1 <= 1;
-      WE0 <= 1;
+
+      //complementary cases
+      IncAddr1 <= 0;
+      SelG1 <= 0;
       if(PxOut < (AIPOut - 2))
       nextState <= R1;
       else if(PxOut == (AIPOut - 2))
@@ -680,7 +728,11 @@ begin
       SelR1 <= 1;
       SelBuf1 <= 1;
       RE1 <= 1;
-      WE0 <= 1;
+
+      //complementary cases
+      IncPx <= 0;
+      SelB1 <= 0;
+
       nextState <= ResetG1;
     end
 
@@ -689,7 +741,10 @@ begin
       SelG1 <= 1;
       SelBuf1 <= 1;
       RE1 <= 1;
-      WE0 <= 1;
+      IncAddr1 <= 1;
+
+      //complementary cases
+      SelR1 <= 0;
       nextState <= ResetB1;
     end
 
@@ -699,7 +754,12 @@ begin
       IncLine <= 1;
       SelB1 <= 1;
       SelBuf1 <= 1;
-      WE0 <= 1;
+
+      //complementary cases
+      IncAddr1 <= 0;
+      SelG1 <= 0;
+      RE1 <= 0;
+
       if(LineOut < (AILOut - 2))
         nextState <= SyncHB1;
       else if(LineOut == (AILOut - 2))
@@ -710,7 +770,12 @@ begin
     SyncHB1: begin
       SyncHB <= 1;
       SelBlank <= 1;
-      WE0 <= 1;
+
+      //complementary cases
+      ResetPx <= 0;
+      IncLine <= 0;
+      SelB1 <= 0;
+      SelBuf1 <= 0;
       nextState <= HB1G;
     end
 
@@ -718,21 +783,32 @@ begin
     SyncHB1B: begin
       SyncHB <= 1;
       SelBlank <= 1;
-      WE0 <= 1;
+
+      //complementary cases
+      ResetPx <= 0;
+      IncLine <= 0;
+      SelB1 <= 0;
+      SelBuf1 <= 0;
       nextState <= LastHB1G;
     end
 
     //59
     LastHB1R: begin
       SelBlank <= 1;
-      WE0 <= 1;
+
+      //complementary cases
+      IncPx <= 0;
+
       nextState <= LastHB1G;
     end
 
     //60
     LastHB1G: begin
       SelBlank <= 1;
-      WE0 <= 1;
+      IncIndex <= 1;
+
+      //complementary cases
+      SyncHB <= 0;
       nextState <= LastHB1B;
     end
 
@@ -740,7 +816,7 @@ begin
     LastHB1B: begin
       IncPx <= 1;
       SelBlank <= 1;
-      WE0 <= 1;
+
       if(PxOut < (HBOut - 2))
       nextState <= LastHB1R;
       else if(PxOut == (HBOut - 2))
@@ -750,14 +826,14 @@ begin
     //62
     ResetLastHB1R: begin
       SelBlank <= 1;
-      WE0 <= 1;
+      //complementary cases
+      IncPx <= 0;
       nextState <= ResetLastHB1G;
     end
 
     //63
     ResetLastHB1G: begin
       SelBlank <= 1;
-      WE0 <= 1;
       nextState <= ResetLastHB1B;
     end
 
@@ -766,7 +842,6 @@ begin
       ResetPx <= 1;
       SelBlank <= 1;
       RE1 <= 1;
-      WE0 <= 1;
       nextState <= LastR1;
     end
 
@@ -775,7 +850,13 @@ begin
       SelR1 <= 1;
       SelBuf1 <= 1;
       RE1 <= 1;
-      WE0 <= 1;
+
+      //complementary cases
+      ResetPx <= 0;
+      SelB1 <= 0;
+      SelBlank <= 0;
+      IncPx <= 0;
+
       nextState <= LastG1;
     end
 
@@ -785,7 +866,8 @@ begin
       SelBuf1 <= 1;
       RE1 <= 1;
       IncAddr1 <= 1;
-      WE0 <= 1;
+      //complementary cases
+      SelR1 <= 0;
       nextState <= LastB1;
     end
 
@@ -795,7 +877,9 @@ begin
       SelB1 <= 1;
       SelBuf1 <= 1;
       RE1 <= 1;
-      WE0 <= 1;
+      //complementary cases
+      IncAddr1 <= 0;
+      SelG1 <= 0;
       if(PxOut < (AIPOut - 2))
       nextState <= LastR1;
       else if(PxOut == (AIPOut - 2))
@@ -807,7 +891,9 @@ begin
       SelR1 <= 1;
       SelBuf1 <= 1;
       RE1 <= 1;
-      WE0 <= 1;
+      //complementary cases
+      IncPx <= 0;
+      SelB1 <= 0;
       nextState <= ResetLastG1;
     end
 
@@ -817,7 +903,8 @@ begin
       SelBuf1 <= 1;
       RE1 <= 1;
       ResetAddr1 <= 1;
-      WE0 <= 1;
+      //complementary cases
+      SelR1 <= 0;
       nextState <= ResetLastB1;
     end
 
@@ -827,7 +914,10 @@ begin
       ResetPx <= 1;
       SelB1 <= 1;
       SelBuf1 <= 1;
-      WE0 <= 1;
+      //complementary cases
+      SelG1 <= 0;
+      RE1 <= 0;
+      ResetAddr1 <= 0;
       nextState <= START0;
     end
  endcase

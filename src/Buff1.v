@@ -1,10 +1,10 @@
 `timescale 1fs/1fs
-module Buf1(R1,B1,G1,RE1,WE1,Addr1,WData, clk, reset, Buffer1Full);
-  input RE1,WE1, clk, reset;
+module Buf1(R1,B1,G1,RE1,WE1,Addr1,WData, clk, reset, Buffer1Full, Buf1Empty);
+  input RE1,WE1, clk, reset, Buf1Empty;
   input [19:0]Addr1;
   input [31:0] WData;
 
-  wire RE1,WE1, clk, reset;
+  wire RE1,WE1, clk, reset, Buf1Empty;
   wire [19:0]Addr1;
   wire [31:0] WData;
 
@@ -22,17 +22,19 @@ module Buf1(R1,B1,G1,RE1,WE1,Addr1,WData, clk, reset, Buffer1Full);
 
   always @ (posedge clk)
     begin
-        if(WE1 == 1) begin
-            buff1[0] <= 24'hffffff;
-            buff1[Addr1 + 1] <= WData[23:0];
-            $display("Addr: %d Buffer1: %h   Wdata:%h", Addr1, buff1[Addr1],WData[23:0]);
+        if(WE1 == 1 && Buf1Empty == 1) begin
+            //$display("Writing to buffer1");
+            //buff1[0] <= 24'hffffff;
+            //buff1[Addr1 + 1] <= WData[23:0];
+            buff1[Addr1] = WData[23:0];
+            //$display("Addr: %d Buffer1: %h   Wdata:%h", Addr1, buff1[Addr1],WData[23:0]);
             if(Addr1 == 9999)begin
-              Buffer1Full <= 1; //buffer filled
-              $display("Befor dumping buf1");
+              Buffer1Full = 1; //buffer filled
+              $display("Before dumping buf1");
               $writememh("Buf1Dump.bmp",buff1);
             end
             else begin
-              Buffer1Full <= 0;
+              Buffer1Full = 0;
             end
 
         end

@@ -52,11 +52,13 @@ wire SelR0,SelG0,SelB0,SelR1,SelG1,SelB1;
 wire IncPx,IncLine;
 
 Addr0_counter addr0(.Addr0(Addr0), .clk(clk), .ResetAddr0(ResetAddr0), .IncAddr0(IncAddr0));
-Buf0 buf0(.R0(R0),.B0(B0),.G0(G0),.RE0(RE0),.WE0(WE0),.Addr0(Addr0),.WData(WData), .clk(clk), .reset(reset) ,.Buffer0Full(Buffer0Full));
+Buf0 buf0(.R0(R0),.B0(B0),.G0(G0),.RE0(RE0),.WE0(WE0),.Addr0(Addr0),.WData(WData), .clk(clk),
+ .reset(reset) ,.Buffer0Full(Buffer0Full), .Buf0Empty(Buf0Empty));
 BufMUX bufMUX0(.Buf(Buf0), .R(R0), .G(G0), .B(B0), .SelR(SelR0), .SelG(SelG0), .SelB(SelB0));
 
 Addr1_counter addr1(.Addr1(Addr1), .clk(clk), .ResetAddr1(ResetAddr1), .IncAddr1(IncAddr1));
-Buf1 buf1(.R1(R1),.B1(B1),.G1(G1),.RE1(RE1),.WE1(WE1),.Addr1(Addr1),.WData(WData), .clk(clk), .reset(reset), .Buffer1Full(Buffer1Full));
+Buf1 buf1(.R1(R1),.B1(B1),.G1(G1),.RE1(RE1),.WE1(WE1),.Addr1(Addr1),.WData(WData), .clk(clk),
+ .reset(reset), .Buffer1Full(Buffer1Full), .Buf1Empty(Buf1Empty));
 BufMUX bufMUX1(.Buf(Buf1), .R(R1), .G(G1), .B(B1), .SelR(SelR1), .SelG(SelG1), .SelB(SelB1));
 
 FrameMUX frameMUX(.FrameIn(FrameIn), .Buf0(Buf0), .Buf1(Buf1), .SelBuf0(SelBuf0), .SelBlank(SelBlank), .SelBuf1(SelBuf1));

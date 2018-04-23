@@ -55,7 +55,7 @@ module ReadImage(clk,fout,imageNumber, Buf1Empty,Buf0Empty);
     end
     if(imageNumber == 2 && Buf1Empty == 1) begin
       fout[23:0] = {image2[count2 + 2],image2[count2 + 1],image2[count2]};
-      //$display("Addr: %d    fout:%h", count1, fout[23:0]);
+      //$display("Addr: %d    fout:%h", count2, fout[23:0]);
       count2 = count2 + 3;
     end
     else begin
